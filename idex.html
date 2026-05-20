@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Asset</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f9;
+        }
+
+        header {
+            background: #2c7be5;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .btn-check {
+            background: #0d6efd;
+            color: white;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+
+        .preview {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .row input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .row button {
+            width: 120px;
+            padding: 0 10px;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+            display: none;
+        }
+
+        .status.ok {
+            background: #e7f7ee;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .status.bad {
+            background: #fdecec;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .status.info {
+            background: #e7f1ff;
+            color: #084298;
+            border: 1px solid #b6d4fe;
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .result-box a {
+            word-break: break-all;
+        }
+
+        .result-img {
+            width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: -2px;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>➕ Add New Asset</header>
+
+    <div class="container">
+
+        <!-- General Info -->
+        <div class="card">
+            <div class="label">Asset Type</div>
+            <select id="type">
+                <option value="">- ประเภทสินทรัพย์ -</option>
+                <option>Desktop(PC)</option>
+                <option>Notebook</option>
+                <option>Tablet</option>
+                <option>Smartphone</option>
+                <option>Printer</option>
+                <option>Scanner</option>
+                <option>Projector</option>
+                <option>Monitor</option>
+            </select>
+
+            <div class="label">Manufacturer</div>
+            <select id="brand">
+                <option value="">- ผู้ผลิต -</option>
+            </select>
+
+            <div class="label">Model</div>
+            <input type="text" id="model" placeholder="รุ่นเช่น OptiPlex3280" />
+
+            <div class="label">Asset No</div>
+            <div class="row">
+                <input type="text" id="serial" placeholder="- หมายเลขสินทรัพย์ -" />
+                <button id="btnCheck" class="btn-check" type="button" onclick="checkAsset()">🔍 ค้นหา</button>
+            </div>
+            <div class="small">* ต้องกดค้นหาก่อน ถึงจะกด Save ได้</div>
+
+            <div id="checkStatus" class="status info"></div>
+        </div>
+
+        <!-- Location -->
+        <div class="card">
+            <div class="label">Plant</div>
+            <select id="plant">
+                <option value="">- โรงงาน -</option>
+                <option>Gateway1</option>
+                <option>Gateway2</option>
+            </select>
+
+            <div class="label">Department</div>
+            <select id="shop">
+                <option value="">- แผนก -</option>
+                <option>ASG1</option>
+                <option>ASG2</option>
+                <option>AEG1</option>
+                <option>AEG2</option>
+                <option>ALG1</option>
+                <option>ALG2</option>
+            </select>
+
+            <div class="label">Area</div>
+            <input type="text" id="area" placeholder="เช่น OfficeA1 / Final" />
+        </div>
+
+        <!-- Owner -->
+        <div class="card">
+            <div class="label">Emp.Code</div>
+            <input type="text" id="code" placeholder="รหัสพนักงาน" />
+
+            <div class="label">Emp.Name</div>
+            <input type="text" id="name" placeholder="ชื่อพนักงาน<เว้นว่างได้>" />
+        </div>
+
+        <!-- Image Upload -->
+        <div class="card">
+            <div class="label">📷 Take Photo / Upload</div>
+            <input type="file" id="image" accept="image/*" capture="environment" />
+            <img id="preview" class="preview" style="display:none;" />
+        </div>
+
+        <!-- Action -->
+        <div class="card">
+            <button class="btn-save" id="btnSave" type="button" onclick="save()" disabled>💾 Save</button>
+
+            <div id="saveStatus" class="status info"></div>
+
+            <div id="resultBox" class="result-box">
+                <div><b>ผลการบันทึก</b></div>
+                <div id="resultText" style="margin-top:6px;"></div>
+                <img id="resultImg" class="result-img" style="display:none;" />
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /***********************
+         * CONFIG: ใส่ URL Flow
+         ***********************/
+        const FLOW_CHECK_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/15875114ce824643bd8b1096c749244a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=rU7sKtSKsQTAG1scsraE15flWzMGFG2Sg7yEvgvJeZw";
+        const FLOW_SAVE_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2f1dcb6a15bc4927892a7109cafabfbe/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=YrRNem0WcJ1AQn8n8cTT9L7VLmS0zuj5NsUA_2dXOZ4";
+
+        /***********************
+         * STATE
+         ***********************/
+        let assetChecked = false;
+        let assetExists = false;
+        let lastCheckedAssetNo = "";
+        let imageDataUrl = "";
+
+        /***********************
+         * UTIL
+         ***********************/
+        const $ = (id) => document.getElementById(id);
+
+        function showStatus(elId, type, message) {
+            const el = $(elId);
+            el.className = "status " + type;
+            el.style.display = "block";
+            el.innerHTML = message;
+        }
+        function hideStatus(elId) {
+            const el = $(elId);
+            el.style.display = "none";
+            el.innerHTML = "";
+        }
+        function setSaveEnabled(enabled) {
+            $("btnSave").disabled = !enabled;
+        }
+        function resetCheckState() {
+            assetChecked = false;
+            assetExists = false;
+            lastCheckedAssetNo = "";
+            setSaveEnabled(false);
+            hideStatus("checkStatus");
+            hideStatus("saveStatus");
+            hideResult();
+        }
+        function hideResult() {
+            $("resultBox").style.display = "none";
+            $("resultText").innerHTML = "";
+            $("resultImg").style.display = "none";
+            $("resultImg").src = "";
+        }
+
+        function escapeHtml(s) {
+            return String(s || "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function normalizeAssetNo(v) {
+            return (v || "").trim(); // ถ้าต้องการลบ space/อักขระพิเศษเพิ่มได้
+        }
+
+        async function postJson(url, payload) {
+            const res = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const text = await res.text();
+            // ถ้า response ว่าง จะคืน {} พร้อม httpStatus
+            if (!text) return { httpStatus: res.status };
+
+            try {
+                const json = JSON.parse(text);
+                json.httpStatus = res.status;
+                return json;
+            } catch {
+                return { raw: text, httpStatus: res.status };
+            }
+        }
+
+        /***********************
+         * dynamic brand
+         ***********************/
+        function updateBrand() {
+            const type = $("type").value;
+            const brandSelect = $("brand");
+
+            brandSelect.innerHTML = '<option value="">-- Select Brand --</option>';
+
+            let brands = [];
+            if (type === "Desktop(PC)" || type === "Notebook") brands = ["Dell", "HP", "Lenovo", "ASUS", "Acer"];
+            else if (type === "Tablet") brands = ["Apple", "Samsung", "Huawei"];
+            else if (type === "Smartphone") brands = ["Apple", "Samsung", "Xiaomi", "OPPO"];
+            else if (type === "Printer") brands = ["HP", "Canon", "Epson", "Brother"];
+            else if (type === "Scanner") brands = ["Canon", "Epson"];
+            else if (type === "Projector") brands = ["Epson", "BenQ", "Sony"];
+            else if (type === "Monitor") brands = ["Dell", "LG", "Samsung", "ASUS"];
+
+            brands.push("Other");
+
+            brands.forEach(b => {
+                const opt = document.createElement("option");
+                opt.value = b;
+                opt.text = b;
+                brandSelect.appendChild(opt);
+            });
+        }
+
+        /***********************
+         * init events (FIX)
+         ***********************/
+
+        // ✅ case ที่ต้อง reset จริง → เปลี่ยนตัวตน asset
+        $("serial").addEventListener("input", resetCheckState);
+
+        // ✅ type/brand/model ถ้าอยาก strict ก็ reset (แนะนำให้ reset)
+        $("type").addEventListener("change", () => { updateBrand(); resetCheckState(); });
+        $("brand").addEventListener("change", resetCheckState);
+        $("model").addEventListener("input", resetCheckState);
+
+        // ✅ field อื่น = ไม่ต้อง reset แล้ว
+        // ให้แค่ evaluate เงื่อนไข enable save
+        $("plant").addEventListener("change", evaluateSaveEnabled);
+        $("shop").addEventListener("change", evaluateSaveEnabled);
+        $("area").addEventListener("input", evaluateSaveEnabled);
+        $("code").addEventListener("input", evaluateSaveEnabled);
+        $("name").addEventListener("input", evaluateSaveEnabled);
+
+        // Enter เพื่อค้นหา
+        $("serial").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                checkAsset();
+            }
+        });
+
+        // image preview
+        $("image").addEventListener("change", function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function () {
+                imageDataUrl = reader.result;
+                $("preview").src = imageDataUrl;
+                $("preview").style.display = "block";
+
+                // ✅ สำคัญ
+                evaluateSaveEnabled();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function getFormData() {
+            return {
+                type: $("type").value.trim(),
+                brand: $("brand").value.trim(),
+                model: $("model").value.trim(),
+                assetNo: normalizeAssetNo($("serial").value),
+                plant: $("plant").value.trim(),
+                department: $("shop").value.trim(),
+                area: $("area").value.trim(),
+                empCode: $("code").value.trim(),
+                empName: $("name").value.trim()
+            };
+        }
+
+        function validateRequiredForSave(data) {
+            const missing = [];
+            if (!data.type) missing.push("Asset Type");
+            if (!data.brand) missing.push("Manufacturer");
+            if (!data.model) missing.push("Model");
+            if (!data.assetNo) missing.push("Asset No");
+            if (!data.plant) missing.push("Plant");
+            if (!data.department) missing.push("Department");
+            if (!data.area) missing.push("Area");
+            if (!data.empCode) missing.push("Emp.Code");
+            if (!imageDataUrl) missing.push("Photo");
+            return missing;
+        }
+
+        function evaluateSaveEnabled() {
+            if (!assetChecked || assetExists) { setSaveEnabled(false); return; }
+            const data = getFormData();
+            if (data.assetNo !== lastCheckedAssetNo) { setSaveEnabled(false); return; }
+            const missing = validateRequiredForSave(data);
+            setSaveEnabled(missing.length === 0);
+        }
+
+        /***********************
+         * Check Asset
+         ***********************/
+        async function checkAsset() {
+            hideStatus("saveStatus");
+            hideResult();
+
+            const assetNo = normalizeAssetNo($("serial").value);
+            if (!assetNo) {
+                showStatus("checkStatus", "bad", "กรุณากรอก Asset No ก่อนกดค้นหา");
+                setSaveEnabled(false);
+                return;
+            }
+
+            $("btnCheck").disabled = true;
+            showStatus("checkStatus", "info", '<span class="spinner"></span>กำลังตรวจสอบ Asset No ...');
+
+            try {
+                const result = await postJson(FLOW_CHECK_URL, { assetNo });
+
+                assetChecked = true;
+                lastCheckedAssetNo = assetNo;
+                assetExists = !!result.exists;
+
+                if (assetExists) {
+                    const who = result.registeredBy ? escapeHtml(result.registeredBy) : "ไม่ทราบชื่อ";
+                    showStatus("checkStatus", "bad",
+                        `พบ Asset No นี้ถูกลงทะเบียนแล้วโดย: <b>${who}</b><br/>ไม่สามารถลงทะเบียนซ้ำได้`);
+                    setSaveEnabled(false);
+                } else {
+                    showStatus("checkStatus", "ok",
+                        "ไม่พบ Asset No นี้ในระบบ ✅ สามารถกรอกข้อมูลให้ครบและกด Save ได้");
+                    evaluateSaveEnabled();
+                }
+            } catch (err) {
+                showStatus("checkStatus", "bad", "ตรวจสอบไม่สำเร็จ: " + escapeHtml(err?.message || err));
+                setSaveEnabled(false);
+            } finally {
+                $("btnCheck").disabled = false;
+            }
+        }
+
+        // re-evaluate เมื่อพิมพ์ช่องอื่น ๆ (หลัง check แล้ว)
+        document.addEventListener("input", evaluateSaveEnabled);
+
+        /***********************
+         * Save
+         ***********************/
+        async function save() {
+            hideResult();
+
+            const data = getFormData();
+
+            if (!assetChecked || data.assetNo !== lastCheckedAssetNo) {
+                showStatus("saveStatus", "bad", "กรุณากดค้นหา Asset No ก่อน แล้วค่อย Save");
+                setSaveEnabled(false);
+                return;
+            }
+            if (assetExists) {
+                showStatus("saveStatus", "bad", "Asset No นี้มีคนลงทะเบียนแล้ว ไม่สามารถ Save ได้");
+                setSaveEnabled(false);
+                return;
+            }
+
+            const missing = validateRequiredForSave(data);
+            if (missing.length > 0) {
+                showStatus("saveStatus", "bad", "กรุณากรอก/แนบให้ครบก่อน Save: <b>" + escapeHtml(missing.join(", ")) + "</b>");
+                setSaveEnabled(false);
+                return;
+            }
+
+            $("btnSave").disabled = true;
+            showStatus("saveStatus", "info", '<span class="spinner"></span>กำลังบันทึกข้อมูลและอัปโหลดรูป...');
+
+            // แปลงรูป
+            const mimeMatch = imageDataUrl.match(/^data:(.+?);base64,/);
+            const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+            const base64 = imageDataUrl.replace(/^data:.+;base64,/, "");
+
+            // ตั้งชื่อไฟล์ให้ตรงกับ library ของคุณ: /Asst_Image/201000019802.jpg
+            const safeAssetNo = data.assetNo.replace(/[\\\/:*?"<>|]/g, "_");
+            const ext = mimeType.includes("png") ? "png" : (mimeType.includes("webp") ? "webp" : "jpg");
+            const fileName = `${safeAssetNo}.${ext}`;
+
+            const payload = {
+                ...data,
+                photo: { fileName, mimeType, base64 },
+                clientTime: new Date().toISOString()
+            };
+
+            try {
+                const result = await postJson(FLOW_SAVE_URL, payload);
+
+                // --- แสดงผลแบบ robust ---
+                const ok = result && (result.success === true || result.success === "true");
+
+                if (!ok) {
+                    showStatus("saveStatus", "bad", "บันทึกไม่สำเร็จ: " + escapeHtml(result?.message || result?.raw || "Unknown error"));
+                    $("btnSave").disabled = false;
+                    return;
+                }
+
+                showStatus("saveStatus", "ok", "บันทึกสำเร็จ ✅");
+
+                // สร้าง HTML แสดงผล
+                const itemId = result.itemId || result.ID || result.id || "";
+                const photoUrl = result.photoUrl || result.PhotoUrl || result.photoURL || "";
+
+                let html = "";
+                if (itemId) html += `ItemId: <b>${escapeHtml(itemId)}</b><br/>`;
+                if (photoUrl) {
+                    html += `Photo: <a href="${escapeHtml(photoUrl)}" target="_blank">${escapeHtml(photoUrl)}</a><br/>`;
+                }
+
+                if (!itemId && !photoUrl) {
+                    html += `<i>Flow ไม่ได้ส่ง ItemId/PhotoUrl กลับมา (แต่บันทึกสำเร็จแล้ว)</i>`;
+                    html += `<br/><span style="color:#6c757d;">แนะนำให้เพิ่มใน Response ของ Flow: itemId และ photoUrl</span>`;
+                }
+
+                $("resultText").innerHTML = html;
+                $("resultBox").style.display = "block";
+
+                if (photoUrl) {
+                    $("resultImg").src = photoUrl;
+                    $("resultImg").style.display = "block";
+                }
+
+                // จะรีเฟรชหน้าทั้งหน้า/เคลียร์ฟอร์ม ก็เปิดบรรทัดนี้
+                // setTimeout(()=> location.reload(), 800);
+
+            } catch (err) {
+                showStatus("saveStatus", "bad", "บันทึกไม่สำเร็จ: " + escapeHtml(err?.message || err));
+                $("btnSave").disabled = false;
+            }
+        }
+
+        // init brand list
+        updateBrand();
+    </script>
+
+</body>
+
+</html>
