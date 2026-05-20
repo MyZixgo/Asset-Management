@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Asset</title>
-    
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -573,6 +573,7 @@
 
                 let html = "";
                 if (itemId) html += `ItemId: <b>${escapeHtml(itemId)}</b><br/>`;
+
                 if (photoUrl) {
                     html += `Photo: <a href="${escapeHtml(photoUrl)}" target="_blank">${escapeHtml(photoUrl)}</a><br/>`;
                 }
@@ -586,8 +587,8 @@
                 $("resultBox").style.display = "block";
 
                 if (photoUrl) {
-                    $("resultImg").src = photoUrl;
-                    $("resultImg").style.display = "block";
+                    //$("resultImg").src = photoUrl;
+                    //$("resultImg").style.display = "block";
                 }
 
                 // จะรีเฟรชหน้าทั้งหน้า/เคลียร์ฟอร์ม ก็เปิดบรรทัดนี้
