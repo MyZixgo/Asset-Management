@@ -414,15 +414,59 @@
             brandSelect.innerHTML = '<option value="">- ผู้ผลิต -</option>';
 
             let brands = [];
-            if (type === "Desktop(PC)" || type === "Notebook") brands = ["Dell", "HP", "Lenovo", "ASUS", "Acer"];
-            else if (type === "Tablet") brands = ["Apple", "Samsung", "Huawei"];
-            else if (type === "Smartphone") brands = ["Apple", "Samsung", "Xiaomi", "OPPO"];
-            else if (type === "Printer") brands = ["HP", "Canon", "Epson", "Brother"];
-            else if (type === "Scanner") brands = ["Canon", "Epson"];
-            else if (type === "Projector") brands = ["Epson", "BenQ", "Sony"];
-            else if (type === "Monitor") brands = ["Dell", "LG", "Samsung", "ASUS"];
-            else if (type === "Other") brands = ["ไม่ระบุ"];
-            brands.push("Other");
+
+            if (type === "Desktop(PC)" || type === "Notebook") {
+                brands = [
+                    "Dell", "HP", "Lenovo", "ASUS", "Acer",
+                    "Apple", "MSI", "Huawei", "Fujitsu",
+                    "Panasonic", "NEC", "Toshiba", "Intel NUC",
+                    "Gigabyte", "Other"
+                ];
+            }
+            else if (type === "Tablet") {
+                brands = [
+                    "Apple", "Samsung", "Huawei",
+                    "Microsoft", "Lenovo", "Amazon",
+                    "Xiaomi", "Other"
+                ];
+            }
+            else if (type === "Smartphone") {
+                brands = [
+                    "Apple", "Samsung", "Xiaomi", "OPPO",
+                    "Vivo", "Huawei", "Realme",
+                    "Sony", "Google", "Nokia", "Asus", "Other"
+                ];
+            }
+            else if (type === "Printer") {
+                brands = [
+                    "HP", "Canon", "Epson", "Brother",
+                    "Fuji Xerox", "Ricoh", "Kyocera",
+                    "OKI", "Samsung", "Other"
+                ];
+            }
+            else if (type === "Scanner") {
+                brands = [
+                    "Canon", "Epson", "HP",
+                    "Fujitsu", "Brother", "Other"
+                ];
+            }
+            else if (type === "Projector") {
+                brands = [
+                    "Epson", "BenQ", "Sony",
+                    "Panasonic", "NEC",
+                    "Optoma", "ViewSonic", "Other"
+                ];
+            }
+            else if (type === "Monitor") {
+                brands = [
+                    "Dell", "LG", "Samsung", "ASUS",
+                    "Acer", "HP", "BenQ",
+                    "ViewSonic", "MSI", "Philips", "Other"
+                ];
+            }
+
+            // กันซ้ำกรณีมี Other อยู่แล้ว
+            brands = [...new Set(brands)];
 
             brands.forEach(b => {
                 const opt = document.createElement("option");
