@@ -7,12 +7,20 @@
     <title>View Asset</title>
     <style>
         :root {
-            --bg: #0b1220;
+
+            --bg: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+
+
+            /* --bg: #0b1220; */
             --card: #111a2e;
             --card2: #0f172a;
-            --text: #e6edf7;
-            --muted: #9fb0c7;
-            --line: rgba(255, 255, 255, .08);
+            /* --text: #e6edf7; */
+            /* --muted: #9fb0c7; */
+            /* --line: rgba(255, 255, 255, .08); */
+
             --accent: #4da3ff;
             --ok: #22c55e;
             --warn: #f59e0b;
@@ -30,12 +38,19 @@
             box-sizing: border-box
         }
 
-        body {
+        /* body {
             margin: 0;
             font-family: var(--sans);
             background: radial-gradient(1200px 700px at 10% 0%, rgba(77, 163, 255, .18), transparent 55%),
                 radial-gradient(900px 650px at 90% 10%, rgba(34, 197, 94, .10), transparent 60%),
                 var(--bg);
+            color: var(--text);
+        } */
+
+        body {
+            margin: 0;
+            font-family: var(--sans);
+            background: #ffffff;
             color: var(--text);
         }
 
@@ -88,14 +103,20 @@
             white-space: nowrap;
         }
 
-        .panel {
+        /* .panel {
             margin-top: 14px;
             padding: 14px;
             border-radius: var(--radius);
             background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .03));
             border: 1px solid var(--line);
             box-shadow: var(--shadow);
+        } */
+
+        .panel {
+            background: #ffffff;
+            border: 1px solid var(--line);
         }
+
 
         .seg {
             display: flex;
@@ -153,8 +174,12 @@
             padding: 12px 12px;
             border-radius: 12px;
             border: 1px solid var(--line);
-            background: rgba(0, 0, 0, .18);
-            color: var(--text);
+
+            background: #ffffff;
+            color: #111;
+
+            /* background: rgba(0, 0, 0, .18); */
+            /* color: var(--text); */
             outline: none;
         }
 
@@ -254,7 +279,10 @@
 
         .card {
             border: 1px solid var(--line);
-            background: linear-gradient(180deg, rgba(17, 26, 46, .92), rgba(15, 23, 42, .92));
+
+            /* background: linear-gradient(180deg, rgba(17, 26, 46, .92), rgba(15, 23, 42, .92)); */
+            background: #ffffff;
+
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow);
@@ -418,10 +446,10 @@
             </div>
 
             <div class="form" id="myForm">
-                <div class="hint">
+                <!-- <div class="hint">
                     โหมดนี้ระบบจะส่งค่า <span style="font-family:var(--mono);color:#fff">Emp_Code="104127"</span> ไปให้
                     Power Automate เพื่อค้นหา Asset ของคุณ
-                </div>
+                </div> -->
                 <div class="row">
                     <div>
                         <label>Emp_Code (Fixed)</label>
