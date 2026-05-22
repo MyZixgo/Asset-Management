@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Asset</title>
 
+    <!-- ✅ LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -279,12 +282,23 @@
         const FLOW_SAVE_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2f1dcb6a15bc4927892a7109cafabfbe/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=YrRNem0WcJ1AQn8n8cTT9L7VLmS0zuj5NsUA_2dXOZ4";
 
         /***********************
+         * LIFF CONFIG
+         * ✅ ต้องใส่ LIFF ID ของคุณ
+         ***********************/
+        const LIFF_ID = "2010143473-Vaj7uW7d";
+
+        /***********************
          * STATE
          ***********************/
         let assetChecked = false;
         let assetExists = false;
         let lastCheckedAssetNo = "";
         let imageDataUrl = "";
+
+        // ✅ LINE/LIFF state
+        let lineUserId = "";
+        let lineIdToken = "";
+        let lineAccessToken = "";
 
         /***********************
          * UTIL
@@ -331,7 +345,7 @@
         }
 
         function normalizeAssetNo(v) {
-            return (v || "").trim(); // ถ้าต้องการลบ space/อักขระพิเศษเพิ่มได้
+            return (v || "").trim();
         }
 
         async function postJson(url, payload) {
@@ -342,7 +356,6 @@
             });
 
             const text = await res.text();
-            // ถ้า response ว่าง จะคืน {} พร้อม httpStatus
             if (!text) return { httpStatus: res.status };
 
             try {
@@ -351,6 +364,42 @@
                 return json;
             } catch {
                 return { raw: text, httpStatus: res.status };
+            }
+        }
+
+        /***********************
+         * ✅ LIFF INIT (Get LINE userId / tokens)
+         ***********************/
+        async function initLiff() {
+            if (!window.liff) {
+                showStatus("saveStatus", "info",
+                    "⚠️ ไม่พบ LIFF SDK หรือหน้านี้ไม่ได้เปิดผ่าน LIFF<br/>" +
+                    "ถ้าต้องการเก็บ LINE userId กรุณาเปิดจากลิงก์ LIFF (https://liff.line.me/...)");
+                return;
+            }
+
+            try {
+                await liff.init({ liffId: LIFF_ID });
+
+                if (!liff.isLoggedIn()) {
+                    // จะ redirect กลับมาที่หน้านี้หลัง login
+                    liff.login();
+                    return;
+                }
+
+                // ✅ token (แนะนำส่งไป Flow เพื่อ verify/ดึง profile เอง)
+                lineIdToken = liff.getIDToken() || "";
+                lineAccessToken = liff.getAccessToken() || "";
+
+                // ✅ userId (ใช้เพื่ออ้างอิง/บันทึกได้)
+                const profile = await liff.getProfile();
+                lineUserId = (profile && profile.userId) ? profile.userId : "";
+
+                // Optional: แสดงสถานะ
+                // showStatus("saveStatus", "info", "✅ LINE userId: <b>" + escapeHtml(lineUserId) + "</b>");
+
+            } catch (err) {
+                showStatus("saveStatus", "bad", "LIFF init failed: " + escapeHtml(err?.message || err));
             }
         }
 
@@ -385,24 +434,18 @@
         /***********************
          * init events (FIX)
          ***********************/
-
-        // ✅ case ที่ต้อง reset จริง → เปลี่ยนตัวตน asset
         $("serial").addEventListener("input", resetCheckState);
 
-        // ✅ type/brand/model ถ้าอยาก strict ก็ reset (แนะนำให้ reset)
         $("type").addEventListener("change", () => { updateBrand(); resetCheckState(); });
         $("brand").addEventListener("change", resetCheckState);
         $("model").addEventListener("input", resetCheckState);
 
-        // ✅ field อื่น = ไม่ต้อง reset แล้ว
-        // ให้แค่ evaluate เงื่อนไข enable save
         $("plant").addEventListener("change", evaluateSaveEnabled);
         $("shop").addEventListener("change", evaluateSaveEnabled);
         $("area").addEventListener("input", evaluateSaveEnabled);
         $("code").addEventListener("input", evaluateSaveEnabled);
         $("name").addEventListener("input", evaluateSaveEnabled);
 
-        // Enter เพื่อค้นหา
         $("serial").addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
                 e.preventDefault();
@@ -410,7 +453,6 @@
             }
         });
 
-        // image preview
         $("image").addEventListener("change", function (e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -420,8 +462,6 @@
                 imageDataUrl = reader.result;
                 $("preview").src = imageDataUrl;
                 $("preview").style.display = "block";
-
-                // ✅ สำคัญ
                 evaluateSaveEnabled();
             };
             reader.readAsDataURL(file);
@@ -437,7 +477,12 @@
                 department: $("shop").value.trim(),
                 area: $("area").value.trim(),
                 empCode: $("code").value.trim(),
-                empName: $("name").value.trim()
+                empName: $("name").value.trim(),
+
+                // ✅ เพิ่ม LINE fields ส่งไป Power Automate
+                lineUserId: (lineUserId || "").trim(),
+                lineIdToken: lineIdToken || "",
+                lineAccessToken: lineAccessToken || ""
             };
         }
 
@@ -452,6 +497,10 @@
             if (!data.area) missing.push("Area");
             if (!data.empCode) missing.push("Emp.Code");
             if (!imageDataUrl) missing.push("Photo");
+
+            // ถ้าคุณ “บังคับ” ต้องมี LINE userId ให้เปิดบรรทัดนี้
+            // if (!data.lineUserId) missing.push("LINE userId");
+
             return missing;
         }
 
@@ -481,7 +530,13 @@
             showStatus("checkStatus", "info", '<span class="spinner"></span>กำลังตรวจสอบ Asset No ...');
 
             try {
-                const result = await postJson(FLOW_CHECK_URL, { assetNo });
+                // ✅ ส่ง lineUserId/token ไปด้วย (ถ้าต้องการให้ Flow log ผู้ใช้งาน)
+                const result = await postJson(FLOW_CHECK_URL, {
+                    assetNo,
+                    lineUserId: (lineUserId || "").trim(),
+                    lineIdToken: lineIdToken || "",
+                    lineAccessToken: lineAccessToken || ""
+                });
 
                 assetChecked = true;
                 lastCheckedAssetNo = assetNo;
@@ -505,7 +560,6 @@
             }
         }
 
-        // re-evaluate เมื่อพิมพ์ช่องอื่น ๆ (หลัง check แล้ว)
         document.addEventListener("input", evaluateSaveEnabled);
 
         /***********************
@@ -537,18 +591,16 @@
             $("btnSave").disabled = true;
             showStatus("saveStatus", "info", '<span class="spinner"></span>กำลังบันทึกข้อมูลและอัปโหลดรูป...');
 
-            // แปลงรูป
             const mimeMatch = imageDataUrl.match(/^data:(.+?);base64,/);
             const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
             const base64 = imageDataUrl.replace(/^data:.+;base64,/, "");
 
-            // ตั้งชื่อไฟล์ให้ตรงกับ library ของคุณ: /Asst_Image/201000019802.jpg
             const safeAssetNo = data.assetNo.replace(/[\\\/:*?"<>|]/g, "_");
             const ext = mimeType.includes("png") ? "png" : (mimeType.includes("webp") ? "webp" : "jpg");
             const fileName = `${safeAssetNo}.${ext}`;
 
             const payload = {
-                ...data,
+                ...data, // ✅ มี lineUserId/lineIdToken/lineAccessToken รวมอยู่แล้ว
                 photo: { fileName, mimeType, base64 },
                 clientTime: new Date().toISOString()
             };
@@ -556,7 +608,6 @@
             try {
                 const result = await postJson(FLOW_SAVE_URL, payload);
 
-                // --- แสดงผลแบบ robust ---
                 const ok = result && (result.success === true || result.success === "true");
 
                 if (!ok) {
@@ -567,7 +618,6 @@
 
                 showStatus("saveStatus", "ok", "บันทึกสำเร็จ ✅");
 
-                // สร้าง HTML แสดงผล
                 const itemId = result.itemId || result.ID || result.id || "";
                 const photoUrl = result.photoUrl || result.PhotoUrl || result.photoURL || "";
 
@@ -583,16 +633,13 @@
                     html += `<br/><span style="color:#6c757d;">แนะนำให้เพิ่มใน Response ของ Flow: itemId และ photoUrl</span>`;
                 }
 
-                $("resultText").innerHTML = html;
-                $("resultBox").style.display = "block";
-
-                if (photoUrl) {
-                    //$("resultImg").src = photoUrl;
-                    //$("resultImg").style.display = "block";
+                // ✅ แสดง LINE userId ที่ส่งไปด้วย (optional)
+                if (data.lineUserId) {
+                    html += `<br/>LINE userId: <b>${escapeHtml(data.lineUserId)}</b>`;
                 }
 
-                // จะรีเฟรชหน้าทั้งหน้า/เคลียร์ฟอร์ม ก็เปิดบรรทัดนี้
-                // setTimeout(()=> location.reload(), 800);
+                $("resultText").innerHTML = html;
+                $("resultBox").style.display = "block";
 
             } catch (err) {
                 showStatus("saveStatus", "bad", "บันทึกไม่สำเร็จ: " + escapeHtml(err?.message || err));
@@ -602,6 +649,9 @@
 
         // init brand list
         updateBrand();
+
+        // ✅ init LIFF
+        document.addEventListener("DOMContentLoaded", initLiff);
     </script>
 
 </body>
