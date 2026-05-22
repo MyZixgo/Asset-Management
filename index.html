@@ -200,6 +200,7 @@
                 <option>Scanner</option>
                 <option>Projector</option>
                 <option>Monitor</option>
+                <option>Other</option>
             </select>
 
             <div class="label">Manufacturer</div>
@@ -420,7 +421,7 @@
             else if (type === "Scanner") brands = ["Canon", "Epson"];
             else if (type === "Projector") brands = ["Epson", "BenQ", "Sony"];
             else if (type === "Monitor") brands = ["Dell", "LG", "Samsung", "ASUS"];
-
+            else if (type === "Other") brands = ["ไม่ระบุ"];
             brands.push("Other");
 
             brands.forEach(b => {
