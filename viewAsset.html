@@ -491,7 +491,10 @@
         }
 
         function buildCard(item) {
-            const photo = item.PhotoUrl || item.PhotoURL || item.photoUrl || "";
+
+            // const photo = item.PhotoUrl || item.PhotoURL || item.photoUrl || "";
+            const photo = item.PhotoBase64 || item.PhotoUrl || "";
+
             const asstNo = item.Asst_No || item.AsstNo || item.Asset_No || item.AssetNo || "";
             const assetType = item.Asset_Type || item.AssetType || "-";
             const manu = item.Manufacturer || "-";
