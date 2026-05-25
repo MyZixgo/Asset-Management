@@ -88,7 +88,7 @@
             margin-top: 5px;
         }
 
-        .row > div {
+        .row>div {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -382,10 +382,10 @@
 
             <!-- MY ASSET -->
             <div class="form" id="myForm">
-                <div class="hint">
+                <!-- <div class="hint">
                     โหมดนี้ระบบจะใช้ <b>LINE User ID</b> ของผู้ใช้งานปัจจุบัน
                     ไปค้นหาในฟิลด์ <b>Asset_ID</b> ที่เก็บ LINE ID ไว้
-                </div>
+                </div> -->
 
                 <div class="row">
                     <div>
@@ -411,14 +411,14 @@
                 <div class="row">
                     <div>
                         <label>Emp_Code</label>
-                        <input id="otherEmp" placeholder="เช่น 104127" inputmode="numeric" />
+                        <input id="otherEmp" placeholder="เช่น 104xxx" inputmode="numeric" />
                     </div>
                 </div>
 
                 <div class="row">
                     <div>
                         <label>Asset_No</label>
-                        <input id="otherAssetNo" placeholder="เช่น 201000019802" inputmode="numeric" />
+                        <input id="otherAssetNo" placeholder="เช่น 20100001xxxx" inputmode="numeric" />
                     </div>
                 </div>
 
@@ -519,8 +519,8 @@
             card.innerHTML = `
                 <div class="img">
                     ${photo
-                        ? `<img src="${safePhoto}" alt="Asset Photo" loading="lazy" />`
-                        : `<div style="color:#6c757d;font-size:13px">ไม่มีรูป</div>`}
+                    ? `<img src="${safePhoto}" alt="Asset Photo" loading="lazy" />`
+                    : `<div style="color:#6c757d;font-size:13px">ไม่มีรูป</div>`}
                     <div class="tag">${escapeHtml(plant)} • ${escapeHtml(area)}</div>
                 </div>
 
