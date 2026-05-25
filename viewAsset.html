@@ -5,293 +5,221 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>View Asset</title>
+
+    <!-- ✅ LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
     <style>
-        :root {
-
-            --bg: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --line: #e5e7eb;
-
-
-            /* --bg: #0b1220; */
-            --card: #111a2e;
-            --card2: #0f172a;
-            /* --text: #e6edf7; */
-            /* --muted: #9fb0c7; */
-            /* --line: rgba(255, 255, 255, .08); */
-
-            --accent: #4da3ff;
-            --ok: #22c55e;
-            --warn: #f59e0b;
-            --err: #ef4444;
-            --shadow: 0 10px 28px rgba(0, 0, 0, .35);
-            --radius: 16px;
-            --radius2: 12px;
-            --gap: 12px;
-            --max: 760px;
-            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Thai", "Noto Sans", sans-serif;
-        }
-
-        * {
-            box-sizing: border-box
-        }
-
-        /* body {
-            margin: 0;
-            font-family: var(--sans);
-            background: radial-gradient(1200px 700px at 10% 0%, rgba(77, 163, 255, .18), transparent 55%),
-                radial-gradient(900px 650px at 90% 10%, rgba(34, 197, 94, .10), transparent 60%),
-                var(--bg);
-            color: var(--text);
-        } */
-
         body {
             margin: 0;
-            font-family: var(--sans);
-            background: #ffffff;
-            color: var(--text);
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #212529;
         }
 
         .wrap {
-            max-width: var(--max);
-            margin: 0 auto;
-            padding: 16px 14px 40px
+            max-width: 700px;
+            margin: auto;
+            padding: 15px;
         }
 
         .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 14px 14px;
-            background: rgba(255, 255, 255, .04);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            backdrop-filter: blur(10px);
-        }
-
-        .title {
-            display: flex;
-            flex-direction: column;
-            gap: 4px
+            background: #2c7be5;
+            color: white;
+            text-align: center;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
         }
 
         .title h1 {
             margin: 0;
             font-size: 18px;
-            letter-spacing: .2px
         }
 
         .title .sub {
             font-size: 12px;
-            color: var(--muted)
+            opacity: 0.85;
         }
 
         .pill {
+            margin-top: 8px;
+            display: inline-block;
             font-size: 12px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, .04);
-            color: var(--muted);
-            white-space: nowrap;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.3);
         }
-
-        /* .panel {
-            margin-top: 14px;
-            padding: 14px;
-            border-radius: var(--radius);
-            background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .03));
-            border: 1px solid var(--line);
-            box-shadow: var(--shadow);
-        } */
 
         .panel {
-            background: #ffffff;
-            border: 1px solid var(--line);
+            margin-top: 15px;
         }
-
 
         .seg {
             display: flex;
-            gap: 8px;
-            background: rgba(0, 0, 0, .2);
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            padding: 6px;
-            overflow: auto;
+            gap: 6px;
+            margin-bottom: 12px;
         }
 
         .seg button {
             flex: 1;
-            min-width: 140px;
-            border: 0;
-            background: transparent;
-            color: var(--muted);
-            padding: 10px 12px;
-            border-radius: 999px;
-            font-weight: 600;
-            letter-spacing: .2px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #dee2e6;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .seg button.active {
-            background: rgba(77, 163, 255, .20);
-            color: var(--text);
-            outline: 1px solid rgba(77, 163, 255, .35)
+            background: #2c7be5;
+            color: white;
         }
 
         .form {
-            margin-top: 12px;
             display: grid;
             gap: 10px;
         }
 
         .row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px
+            display: flex;
+            gap: 12px;
+            margin-top: 5px;
         }
 
-        @media(min-width:520px) {
-            .row {
-                grid-template-columns: 1fr 1fr
-            }
+        .row > div {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row input {
+            margin-top: 4px;
         }
 
         label {
-            font-size: 12px;
-            color: var(--muted)
+            font-size: 13px;
+            font-weight: bold;
         }
 
         input {
             width: 100%;
-            padding: 12px 12px;
-            border-radius: 12px;
-            border: 1px solid var(--line);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
 
-            background: #ffffff;
-            color: #111;
-
-            /* background: rgba(0, 0, 0, .18); */
-            /* color: var(--text); */
+        input:focus {
             outline: none;
-        }
-
-        input::placeholder {
-            color: rgba(159, 176, 199, .6)
-        }
-
-        .hint {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.35
+            border-color: #2c7be5;
         }
 
         .actions {
             display: flex;
             gap: 10px;
-            align-items: center;
-            margin-top: 6px
         }
 
         .btn {
-            border: 0;
-            border-radius: 14px;
-            padding: 12px 14px;
-            font-weight: 700;
-            color: #06101f;
-            background: var(--accent);
-            box-shadow: 0 10px 20px rgba(77, 163, 255, .25);
             flex: 1;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #0b5ed7;
         }
 
         .btn:disabled {
-            opacity: .55;
-            filter: saturate(.6);
-            box-shadow: none
+            opacity: 0.65;
+            cursor: not-allowed;
         }
 
         .btn2 {
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 12px 14px;
-            font-weight: 700;
-            color: var(--text);
-            background: rgba(255, 255, 255, .06);
-            flex: 0 0 auto;
+            flex: 1;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .btn2:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
         }
 
         .status {
-            margin-top: 12px;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 1px dashed var(--line);
-            background: rgba(0, 0, 0, .18);
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.35;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: block;
+            line-height: 1.45;
+            white-space: pre-line;
         }
 
         .status.ok {
-            border-color: rgba(34, 197, 94, .35);
-            color: #baf3ce
+            background: #e7f7ee;
+            color: #0f5132;
+            border: 1px solid #badbcc;
         }
 
         .status.err {
-            border-color: rgba(239, 68, 68, .45);
-            color: #ffd1d1
+            background: #fdecec;
+            color: #842029;
+            border: 1px solid #f5c2c7;
         }
 
         .status.warn {
-            border-color: rgba(245, 158, 11, .45);
-            color: #ffe6b5
+            background: #fff4e0;
+            color: #7a4d00;
+            border: 1px solid #ffe0a3;
         }
 
         .results {
-            margin-top: 14px;
-            display: grid;
-            gap: 12px
+            margin-top: 15px;
         }
 
         .meta {
+            padding: 10px;
+            border-radius: 10px;
+            background: white;
+            border: 1px dashed #ced4da;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
             gap: 10px;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, .04);
-            font-size: 13px;
-            color: var(--muted);
+            flex-wrap: wrap;
         }
 
         .cards {
             display: grid;
-            gap: 12px
+            gap: 12px;
         }
 
         .card {
-            border: 1px solid var(--line);
-
-            /* background: linear-gradient(180deg, rgba(17, 26, 46, .92), rgba(15, 23, 42, .92)); */
-            background: #ffffff;
-
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
         }
 
         .img {
             width: 100%;
-            aspect-ratio: 16/9;
-            background: rgba(0, 0, 0, .25);
+            height: 180px;
+            background: #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -302,129 +230,136 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block
         }
 
-        .img .tag {
+        .tag {
             position: absolute;
             left: 10px;
             bottom: 10px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(0, 0, 0, .55);
-            border: 1px solid rgba(255, 255, 255, .12);
-            font-size: 12px;
+            background: rgba(0, 0, 0, 0.65);
             color: #fff;
+            font-size: 12px;
+            padding: 5px 8px;
+            border-radius: 999px;
         }
 
         .body {
-            padding: 12px 12px 10px
+            margin-top: 10px;
         }
 
         .head {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            margin-bottom: 10px;
             gap: 10px;
-            margin-bottom: 8px;
         }
 
-        .head .left {
+        .left {
             display: flex;
             flex-direction: column;
-            gap: 4px
+            gap: 4px;
         }
 
         .assetno {
-            font-family: var(--mono);
-            font-weight: 800;
+            font-weight: bold;
             font-size: 15px;
-            letter-spacing: .4px
+            word-break: break-word;
         }
 
         .atype {
             font-size: 12px;
-            color: var(--muted)
+            color: #6c757d;
         }
 
         .chip {
+            background: #e9ecef;
+            padding: 5px 8px;
+            border-radius: 6px;
             font-size: 12px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, .05);
-            color: var(--text);
             white-space: nowrap;
+            height: fit-content;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
-            margin-top: 10px;
-        }
-
-        @media(min-width:520px) {
-            .grid {
-                grid-template-columns: 1fr 1fr
-            }
         }
 
         .kv {
-            padding: 10px;
-            border-radius: 12px;
-            border: 1px solid var(--line);
-            background: rgba(0, 0, 0, .14);
-            min-height: 54px;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 8px;
         }
 
         .k {
             font-size: 11px;
-            color: var(--muted)
+            color: #6c757d;
         }
 
         .v {
-            margin-top: 4px;
             font-size: 13px;
-            color: var(--text);
-            word-break: break-word
+            margin-top: 4px;
+            word-break: break-word;
         }
 
         .foot {
+            margin-top: 10px;
             display: flex;
-            gap: 10px;
-            padding: 10px 12px 12px;
-            border-top: 1px solid var(--line);
-            background: rgba(0, 0, 0, .12);
+            gap: 8px;
         }
 
         .link {
             flex: 1;
-            text-decoration: none;
             text-align: center;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(77, 163, 255, .35);
-            background: rgba(77, 163, 255, .12);
-            color: var(--text);
-            font-weight: 700;
+            padding: 10px;
+            border-radius: 8px;
+            background: #0d6efd;
+            color: white;
+            text-decoration: none;
             font-size: 13px;
         }
 
         .copy {
-            flex: 0 0 auto;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, .06);
-            color: var(--text);
-            font-weight: 700;
-            font-size: 13px;
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
 
         .small {
             font-size: 12px;
-            color: var(--muted)
+            color: #6c757d;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: #495057;
+            background: #ffffff;
+            border: 1px dashed #ced4da;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .mono {
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+        }
+
+        @media (max-width: 480px) {
+            .row {
+                flex-direction: column;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .foot {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -445,19 +380,17 @@
                 <button id="tabOther" type="button">🔎 Asset ของคนอื่น</button>
             </div>
 
+            <!-- MY ASSET -->
             <div class="form" id="myForm">
-                <!-- <div class="hint">
-                    โหมดนี้ระบบจะส่งค่า <span style="font-family:var(--mono);color:#fff">Emp_Code="104127"</span> ไปให้
-                    Power Automate เพื่อค้นหา Asset ของคุณ
-                </div> -->
+                <div class="hint">
+                    โหมดนี้ระบบจะใช้ <b>LINE User ID</b> ของผู้ใช้งานปัจจุบัน
+                    ไปค้นหาในฟิลด์ <b>Asset_ID</b> ที่เก็บ LINE ID ไว้
+                </div>
+
                 <div class="row">
                     <div>
-                        <label>Emp_Code (Fixed)</label>
-                        <input id="myEmp" value="104127" readonly />
-                    </div>
-                    <div>
-                        <label>หมายเหตุ</label>
-                        <input value="ค้นหาจาก Emp_Code เท่านั้น" readonly />
+                        <label>LINE User ID</label>
+                        <input id="myLineId" placeholder="กำลังโหลดจาก LINE..." readonly />
                     </div>
                 </div>
 
@@ -469,6 +402,7 @@
                 <div class="status" id="statusBox">พร้อมค้นหา</div>
             </div>
 
+            <!-- OTHER ASSET -->
             <div class="form" id="otherForm" style="display:none">
                 <div class="hint">
                     โหมดนี้ให้กรอก <b>Emp_Code</b> หรือ <b>Asset_No</b> อย่างใดอย่างหนึ่งเพื่อค้นหา
@@ -479,6 +413,9 @@
                         <label>Emp_Code</label>
                         <input id="otherEmp" placeholder="เช่น 104127" inputmode="numeric" />
                     </div>
+                </div>
+
+                <div class="row">
                     <div>
                         <label>Asset_No</label>
                         <input id="otherAssetNo" placeholder="เช่น 201000019802" inputmode="numeric" />
@@ -509,38 +446,30 @@
          *  ========================== */
         const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/4acd54dcfb9b4cb7a2c9370ee0a0746e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tvQw4oo26AYM9qr8U_5xoVdGz3fX5Gar8YpOFN_L8mM";
 
-        /** Expected Flow response (แนะนำ)
-         *  {
-         *    "ok": true,
-         *    "items": [
-         *      {
-         *        "Asset_Type": "Desktop(PC)",
-         *        "Manufacturer": "Dell",
-         *        "Model": "...",
-         *        "Asst_No": "201000019802",
-         *        "Plant": "Gateway1",
-         *        "Department": "AEG1",
-         *        "Area": "Office A1",
-         *        "Emp_Code": "104127",
-         *        "Emp_Name": "....",
-         *        "PhotoUrl": "https://....jpg"
-         *      }
-         *    ],
-         *    "message": "optional"
-         *  }
-         */
+        // ✅ ใส่ LIFF ID ของจริง
+        const LIFF_ID = "2010143473-DPdFN5rP";
 
         const $ = (id) => document.getElementById(id);
         const envPill = $("envPill");
 
+        // LINE state
+        let lineUserId = "";
+        let lineDisplayName = "";
+        let liffInitialized = false;
+
         function setPill(text, tone = "ready") {
             envPill.textContent = text;
-            envPill.style.borderColor = (tone === "err") ? "rgba(239,68,68,.45)"
-                : (tone === "warn") ? "rgba(245,158,11,.45)"
-                    : "rgba(255,255,255,.10)";
-            envPill.style.color = (tone === "err") ? "#ffd1d1"
-                : (tone === "warn") ? "#ffe6b5"
-                    : "#9fb0c7";
+
+            if (tone === "err") {
+                envPill.style.background = "rgba(220,53,69,.20)";
+                envPill.style.color = "#fff";
+            } else if (tone === "warn") {
+                envPill.style.background = "rgba(255,193,7,.25)";
+                envPill.style.color = "#fff";
+            } else {
+                envPill.style.background = "rgba(255,255,255,.30)";
+                envPill.style.color = "#fff";
+            }
         }
 
         function setStatus(box, text, tone = "") {
@@ -588,48 +517,47 @@
             card.className = "card";
 
             card.innerHTML = `
-    <div class="img">
-      ${photo ? `<img src="${safePhoto}" alt="Asset Photo" loading="lazy" />`
-                    : `<div style="color:rgba(159,176,199,.8);font-size:13px">ไม่มีรูป</div>`}
-      <div class="tag">${escapeHtml(plant)} • ${escapeHtml(area)}</div>
-    </div>
+                <div class="img">
+                    ${photo
+                        ? `<img src="${safePhoto}" alt="Asset Photo" loading="lazy" />`
+                        : `<div style="color:#6c757d;font-size:13px">ไม่มีรูป</div>`}
+                    <div class="tag">${escapeHtml(plant)} • ${escapeHtml(area)}</div>
+                </div>
 
-    <div class="body">
-      <div class="head">
-        <div class="left">
-          <div class="assetno">${safeAsst || "-"}</div>
-          <div class="atype">${escapeHtml(assetType)}</div>
-        </div>
-        <div class="chip">${escapeHtml(manu)}</div>
-      </div>
+                <div class="body">
+                    <div class="head">
+                        <div class="left">
+                            <div class="assetno">${safeAsst || "-"}</div>
+                            <div class="atype">${escapeHtml(assetType)}</div>
+                        </div>
+                        <div class="chip">${escapeHtml(manu)}</div>
+                    </div>
 
-      <div class="grid">
-        <div class="kv">
-          <div class="k">Model</div>
-          <div class="v">${escapeHtml(model)}</div>
-        </div>
-        <div class="kv">
-          <div class="k">Department</div>
-          <div class="v">${escapeHtml(dept)}</div>
-        </div>
-        <div class="kv">
-          <div class="k">Emp_Code</div>
-          <div class="v" style="font-family:var(--mono)">${escapeHtml(empCode)}</div>
-        </div>
-        <div class="kv">
-          <div class="k">Emp_Name</div>
-          <div class="v">${escapeHtml(empName)}</div>
-        </div>
-      </div>
-    </div>
+                    <div class="grid">
+                        <div class="kv">
+                            <div class="k">Model</div>
+                            <div class="v">${escapeHtml(model)}</div>
+                        </div>
+                        <div class="kv">
+                            <div class="k">Department</div>
+                            <div class="v">${escapeHtml(dept)}</div>
+                        </div>
+                        <div class="kv">
+                            <div class="k">Emp_Code</div>
+                            <div class="v mono">${escapeHtml(empCode)}</div>
+                        </div>
+                        <div class="kv">
+                            <div class="k">Emp_Name</div>
+                            <div class="v">${escapeHtml(empName)}</div>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="foot">
-      <a class="link" href="${safePhoto || "#"}" target="_blank" rel="noopener" ${photo ? "" : "aria-disabled='true' onclick='return false;'"}>
-        🖼️ เปิดรูป
-      </a>
-      <button class="copy" type="button">📋 Copy Asset_No</button>
-    </div>
-  `;
+                <div class="foot">
+                    <a class="link" href="${safePhoto || "#"}" target="_blank" rel="noopener" ${photo ? "" : "aria-disabled='true' onclick='return false;'"}>🖼️ เปิดรูป</a>
+                    <button class="copy" type="button">📋 Copy Asset_No</button>
+                </div>
+            `;
 
             card.querySelector(".copy").addEventListener("click", async () => {
                 const txt = asstNo || "";
@@ -638,16 +566,66 @@
                     setPill("Copied ✓", "ready");
                     setTimeout(() => setPill("Ready", "ready"), 1200);
                 } catch (e) {
-                    // fallback
                     const ta = document.createElement("textarea");
-                    ta.value = txt; document.body.appendChild(ta);
-                    ta.select(); document.execCommand("copy"); ta.remove();
+                    ta.value = txt;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand("copy");
+                    ta.remove();
                     setPill("Copied ✓", "ready");
                     setTimeout(() => setPill("Ready", "ready"), 1200);
                 }
             });
 
             return card;
+        }
+
+        async function initLiff() {
+            if (!window.liff) {
+                setStatus($("statusBox"), "ไม่พบ LIFF SDK", "err");
+                setPill("No LIFF", "err");
+                return false;
+            }
+
+            if (!LIFF_ID || LIFF_ID === "PUT_YOUR_LIFF_ID_HERE") {
+                setStatus($("statusBox"), "กรุณาใส่ LIFF_ID ก่อนใช้งาน", "err");
+                setPill("No LIFF_ID", "err");
+                return false;
+            }
+
+            try {
+                setPill("Initializing LINE...", "warn");
+                setStatus($("statusBox"), "กำลังเชื่อมต่อ LINE...", "");
+
+                await liff.init({ liffId: LIFF_ID });
+
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                    return false;
+                }
+
+                const profile = await liff.getProfile();
+                lineUserId = profile?.userId || "";
+                lineDisplayName = profile?.displayName || "";
+                liffInitialized = true;
+
+                $("myLineId").value = lineUserId || "";
+
+                if (!lineUserId) {
+                    setStatus($("statusBox"), "ไม่สามารถอ่าน LINE User ID ได้", "err");
+                    setPill("LINE Error", "err");
+                    return false;
+                }
+
+                setStatus($("statusBox"), `พร้อมค้นหา\nผู้ใช้ LINE: ${lineDisplayName || "-"}`, "ok");
+                setPill("LINE Ready", "ready");
+                return true;
+
+            } catch (err) {
+                setStatus($("statusBox"), "เชื่อมต่อ LINE ไม่สำเร็จ: " + (err?.message || String(err)), "err");
+                setPill("LINE Error", "err");
+                return false;
+            }
         }
 
         async function callFlow(payload) {
@@ -661,19 +639,21 @@
                 body: JSON.stringify(payload)
             });
 
-            // ถ้า flow ส่ง error status
             if (!res.ok) {
                 const t = await res.text().catch(() => "");
                 throw new Error(`เรียก Flow ไม่สำเร็จ (HTTP ${res.status}) ${t ? "- " + t : ""}`);
             }
 
-            // รองรับทั้ง JSON และ text (เผื่อ flow ตอบไม่ใช่ json)
             const ct = res.headers.get("content-type") || "";
             if (ct.includes("application/json")) {
                 return await res.json();
             } else {
                 const txt = await res.text();
-                try { return JSON.parse(txt); } catch { return { ok: false, items: [], message: txt }; }
+                try {
+                    return JSON.parse(txt);
+                } catch {
+                    return { ok: false, items: [], message: txt };
+                }
             }
         }
 
@@ -689,7 +669,17 @@
                 let payload = { mode };
 
                 if (mode === "my") {
-                    payload.Emp_Code = "104127";
+                    if (!liffInitialized || !lineUserId) {
+                        setStatus(status, "ยังไม่ได้รับ LINE User ID กรุณาเปิดผ่าน LINE OA / LIFF", "warn");
+                        setPill("Need LINE", "warn");
+                        return;
+                    }
+
+                    // ✅ ส่ง Line ID ไปหาใน Asset_ID
+                    payload.Asset_ID = lineUserId;
+                    payload.LineUserId = lineUserId;
+                    payload.SearchField = "Asset_ID";
+                    payload.FromLINE = true;
                 } else {
                     const emp = normalizeDigits($("otherEmp").value);
                     const asst = normalizeDigits($("otherAssetNo").value);
@@ -699,6 +689,7 @@
                         setPill("Need input", "warn");
                         return;
                     }
+
                     if (emp) payload.Emp_Code = emp;
                     if (asst) payload.Asset_No = asst;
                 }
@@ -716,13 +707,12 @@
                     return;
                 }
 
-                // render
                 $("cards").innerHTML = "";
                 items.forEach(it => $("cards").appendChild(buildCard(it)));
 
                 $("resultCount").textContent = `ผลลัพธ์: ${items.length}`;
                 $("lastQuery").textContent = (mode === "my")
-                    ? `mode=my, Emp_Code=104127`
+                    ? `mode=my, Asset_ID=${lineUserId}`
                     : `mode=other, ${payload.Emp_Code ? "Emp_Code=" + payload.Emp_Code : ""}${payload.Emp_Code && payload.Asset_No ? ", " : ""}${payload.Asset_No ? "Asset_No=" + payload.Asset_No : ""}`;
 
                 showResults(true);
@@ -735,6 +725,7 @@
                     setPill("Done", "ready");
                     setTimeout(() => setPill("Ready", "ready"), 1200);
                 }
+
             } catch (err) {
                 setStatus(status, err.message || String(err), "err");
                 setPill("Error", "err");
@@ -753,6 +744,7 @@
             $("myForm").style.display = "grid";
             $("otherForm").style.display = "none";
         });
+
         $("tabOther").addEventListener("click", () => {
             $("tabOther").classList.add("active");
             $("tabMy").classList.remove("active");
@@ -768,6 +760,7 @@
             setStatus($("statusBox"), "พร้อมค้นหา", "");
             setPill("Ready", "ready");
         });
+
         $("btnClear2").addEventListener("click", () => {
             $("otherEmp").value = "";
             $("otherAssetNo").value = "";
@@ -776,7 +769,6 @@
             setPill("Ready", "ready");
         });
 
-        // Enter to search (Other mode)
         ["otherEmp", "otherAssetNo"].forEach(id => {
             $(id).addEventListener("keydown", (e) => {
                 if (e.key === "Enter") runSearch("other");
@@ -784,13 +776,13 @@
         });
 
         /** ==========================
-         *  Querystring support (สำหรับเปิดจาก LINE OA)
+         *  Querystring support
          *  ตัวอย่าง:
          *  - ?mode=my
          *  - ?mode=other&emp=104127
          *  - ?mode=other&asset=201000019802
          *  ========================== */
-        (function initFromQuery() {
+        function initFromQuery() {
             const q = new URLSearchParams(location.search);
             const mode = (q.get("mode") || "").toLowerCase();
             const emp = q.get("emp") || "";
@@ -805,7 +797,12 @@
                 $("tabMy").click();
                 runSearch("my");
             }
-        })();
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await initLiff();
+            initFromQuery();
+        });
     </script>
 </body>
 
