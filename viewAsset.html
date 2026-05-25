@@ -88,7 +88,7 @@
             margin-top: 5px;
         }
 
-        .row>div {
+        .row > div {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -382,18 +382,6 @@
 
             <!-- MY ASSET -->
             <div class="form" id="myForm">
-                <!-- <div class="hint">
-                    โหมดนี้ระบบจะใช้ <b>LINE User ID</b> ของผู้ใช้งานปัจจุบัน
-                    ไปค้นหาในฟิลด์ <b>Asset_ID</b> ที่เก็บ LINE ID ไว้
-                </div> -->
-
-                <!-- <div class="row">
-                    <div>
-                        <label>LINE User ID</label>
-                        <input id="myLineId" placeholder="กำลังโหลดจาก LINE..." readonly />
-                    </div>
-                </div> -->
-
                 <div class="actions">
                     <button class="btn" id="btnSearchMy" type="button">ค้นหา Asset ของฉัน</button>
                     <button class="btn2" id="btnClear" type="button">ล้างผลลัพธ์</button>
@@ -434,7 +422,7 @@
         <div class="results" id="results" style="display:none">
             <div class="meta">
                 <div id="resultCount">ผลลัพธ์: 0</div>
-                <div class="small" id="lastQuery">—</div>
+                <div class="small" id="lastQuery" style="display:none;">—</div>
             </div>
             <div class="cards" id="cards"></div>
         </div>
@@ -446,13 +434,13 @@
          *  ========================== */
         const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/4acd54dcfb9b4cb7a2c9370ee0a0746e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=tvQw4oo26AYM9qr8U_5xoVdGz3fX5Gar8YpOFN_L8mM";
 
-        // ✅ ใส่ LIFF ID ของจริง
+        // ✅ LIFF ID ของคุณ
         const LIFF_ID = "2010143473-DPdFN5rP";
 
         const $ = (id) => document.getElementById(id);
         const envPill = $("envPill");
 
-        // LINE state
+        // LINE state (เก็บไว้ใช้เบื้องหลังเท่านั้น)
         let lineUserId = "";
         let lineDisplayName = "";
         let liffInitialized = false;
@@ -479,7 +467,11 @@
 
         function escapeHtml(s) {
             return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
             }[m]));
         }
 
@@ -519,8 +511,8 @@
             card.innerHTML = `
                 <div class="img">
                     ${photo
-                    ? `<img src="${safePhoto}" alt="Asset Photo" loading="lazy" />`
-                    : `<div style="color:#6c757d;font-size:13px">ไม่มีรูป</div>`}
+                        ? `<img src="${safePhoto}" alt="Asset Photo" loading="lazy" />`
+                        : `<div style="color:#6c757d;font-size:13px">ไม่มีรูป</div>`}
                     <div class="tag">${escapeHtml(plant)} • ${escapeHtml(area)}</div>
                 </div>
 
@@ -609,15 +601,13 @@
                 lineDisplayName = profile?.displayName || "";
                 liffInitialized = true;
 
-                $("myLineId").value = lineUserId || "";
-
                 if (!lineUserId) {
-                    setStatus($("statusBox"), "ไม่สามารถอ่าน LINE User ID ได้", "err");
+                    setStatus($("statusBox"), "ไม่สามารถอ่านข้อมูลผู้ใช้ LINE ได้", "err");
                     setPill("LINE Error", "err");
                     return false;
                 }
 
-                setStatus($("statusBox"), `พร้อมค้นหา\nผู้ใช้ LINE: ${lineDisplayName || "-"}`, "ok");
+                setStatus($("statusBox"), "พร้อมค้นหา (User verified ✅)", "ok");
                 setPill("LINE Ready", "ready");
                 return true;
 
@@ -670,16 +660,17 @@
 
                 if (mode === "my") {
                     if (!liffInitialized || !lineUserId) {
-                        setStatus(status, "ยังไม่ได้รับ LINE User ID กรุณาเปิดผ่าน LINE OA / LIFF", "warn");
+                        setStatus(status, "ยังไม่ได้รับข้อมูลผู้ใช้ LINE กรุณาเปิดผ่าน LINE OA / LIFF", "warn");
                         setPill("Need LINE", "warn");
                         return;
                     }
 
-                    // ✅ ส่ง Line ID ไปหาใน Asset_ID
+                    // ✅ ใช้ LINE ID เบื้องหลังเท่านั้น ไม่ show บน UI
                     payload.Asset_ID = lineUserId;
                     payload.LineUserId = lineUserId;
                     payload.SearchField = "Asset_ID";
                     payload.FromLINE = true;
+
                 } else {
                     const emp = normalizeDigits($("otherEmp").value);
                     const asst = normalizeDigits($("otherAssetNo").value);
@@ -712,7 +703,7 @@
 
                 $("resultCount").textContent = `ผลลัพธ์: ${items.length}`;
                 $("lastQuery").textContent = (mode === "my")
-                    ? `mode=my, Asset_ID=${lineUserId}`
+                    ? "mode=my (LINE)"
                     : `mode=other, ${payload.Emp_Code ? "Emp_Code=" + payload.Emp_Code : ""}${payload.Emp_Code && payload.Asset_No ? ", " : ""}${payload.Asset_No ? "Asset_No=" + payload.Asset_No : ""}`;
 
                 showResults(true);
