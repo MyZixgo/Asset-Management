@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f766e">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f766e"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <title>Add Asset</title>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <style>
@@ -10,7 +10,7 @@
 </head><body><div class="app">
 <header class="head"><div class="top"><button class="back" onclick="history.back()">‹</button><div><div class="title">เพิ่ม Asset</div><div class="sub" id="who">กำลังเชื่อมต่อ LINE...</div></div></div></header>
 <div id="msg" class="msg"></div>
-<section class="box"><div class="section">1. Asset No.</div><div class="label">Asset No. <span class="req">*</span></div><div class="assetrow"><input id="assetNo" inputmode="numeric" placeholder="กรอกหรือ Scan QR"><button id="scanBtn" class="scan" title="Scan">▣</button></div><div class="hint">QR ตัวอย่าง 45002010000198020005 ระบบจะแปลงเป็น 201000019802</div><button id="checkBtn" class="btn secondary">ตรวจสอบ Asset No.</button></section>
+<section class="box"><div class="section">1. Asset No.</div><div class="label">Asset No. <span class="req">*</span></div><div class="assetrow"><input id="assetNo" inputmode="numeric" placeholder="กรอกหรือ Scan QR"><button type="button" id="scanBtn" class="scan" title="Scan">▣</button></div><div class="hint">QR ตัวอย่าง 45002010000198020005 ระบบจะแปลงเป็น 201000019802</div><button type="button" id="checkBtn" class="btn secondary">ตรวจสอบ Asset No.</button></section>
 <form id="form" class="disabled">
 <section class="box"><div class="section">2. ข้อมูล Asset</div><div class="grid">
 <div><div class="label">ประเภท <span class="req">*</span></div><input id="assetType" required placeholder="Notebook / Monitor"></div><div><div class="label">ผู้ผลิต</div><input id="manufacturer" placeholder="Dell"></div>
@@ -37,29 +37,27 @@ const $=id=>document.getElementById(id);
 function message(t,type='err'){const m=$('msg');m.textContent=t;m.className='msg '+type;m.style.display='block';scrollTo({top:0,behavior:'smooth'})}function clearMsg(){$('msg').style.display='none'}
 // Current rule based on supplied real example. Add more QR samples before treating this as universal.
 function parseAssetNo(raw) {
-    const value = String(raw || '')
-        .trim()
-        .replace(/\s/g, '');
+    const value = String(raw || '').replace(/\D/g, '');
 
-    // กรณีเป็น Asset No. โดยตรง 12 หลัก
+    // QR หน้างาน: 4500 + Asset No. 12 หลัก + Running/Check 5 หลัก
+    if (/^4500\d{17}$/.test(value)) {
+        return value.slice(4, -5);
+    }
+
+    // กรอก Asset No. ตรง ๆ
     if (/^\d{12}$/.test(value)) {
         return value;
     }
 
-    // ค้นหา Asset No. ที่ขึ้นต้นด้วย 201 และมีทั้งหมด 12 หลัก
+    // สำรอง: หาเลข 12 หลักที่ขึ้นต้นด้วย 201
     const match = value.match(/201\d{9}/);
-
-    if (match) {
-        return match[0];
-    }
-
-    // ไม่พบรูปแบบที่รองรับ
-    return value;
+    return match ? match[0] : value;
 }
+let isCheckingAsset = false;
 async function init(){try{await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}profile=await liff.getProfile();$('who').textContent=profile.displayName||'LINE connected'}catch(e){message('เชื่อมต่อ LINE ไม่สำเร็จ: '+(e.message||e))}}
 $('scanBtn').onclick=async()=>{clearMsg();try{if(liff.scanCodeV2){const r=await liff.scanCodeV2();if(r&&r.value){$('assetNo').value=parseAssetNo(r.value);await checkAsset()}}else message('LIFF นี้ยังไม่เปิดสิทธิ์ Scan QR กรุณากรอก Asset No. ก่อน')}catch(e){if(!String(e.message||e).toLowerCase().includes('cancel'))message('Scan ไม่สำเร็จ: '+(e.message||e))}};
 $('checkBtn').onclick=checkAsset;
-async function checkAsset(){clearMsg();const assetNo=parseAssetNo($('assetNo').value);$('assetNo').value=assetNo;if(!assetNo)return message('กรุณากรอกหรือ Scan Asset No.');$('checkBtn').textContent='กำลังตรวจสอบ...';$('checkBtn').disabled=true;try{const r=await fetch(CHECK_FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'asset',assetNo})});if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();if(d.exists||((d.items||[]).length)){return message('Asset No. นี้มีอยู่ในระบบแล้ว กรุณาเปิด Asset เดิมแทน') }checkedAssetNo=assetNo;$('form').classList.remove('disabled');message('Asset No. ใช้งานได้ กรอกข้อมูลต่อได้เลย','ok')}catch(e){message('ตรวจสอบ Asset ไม่สำเร็จ: '+(e.message||e))}finally{$('checkBtn').textContent='ตรวจสอบ Asset No.';$('checkBtn').disabled=false}}
+async function checkAsset(){if(isCheckingAsset)return;isCheckingAsset=true;clearMsg();const assetNo=parseAssetNo($('assetNo').value);$('assetNo').value=assetNo;if(!assetNo){isCheckingAsset=false;return message('กรุณากรอกหรือ Scan Asset No.')}$('checkBtn').textContent='กำลังตรวจสอบ...';$('checkBtn').disabled=true;try{const r=await fetch(CHECK_FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'asset',assetNo})});if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();if(d.exists||((d.items||[]).length)){return message('Asset No. นี้มีอยู่ในระบบแล้ว กรุณาเปิด Asset เดิมแทน') }checkedAssetNo=assetNo;$('form').classList.remove('disabled');message('Asset No. ใช้งานได้ กรอกข้อมูลต่อได้เลย','ok')}catch(e){message('ตรวจสอบ Asset ไม่สำเร็จ: '+(e.message||e))}finally{isCheckingAsset=false;$('checkBtn').textContent='ตรวจสอบ Asset No.';$('checkBtn').disabled=false}}
 function preview(input,img,text){input.onchange=()=>{const f=input.files[0];if(!f)return;img.src=URL.createObjectURL(f);img.hidden=false;text.hidden=true}}
 preview($('assetPhoto'),$('assetPreview'),$('assetPhotoText'));preview($('labelPhoto'),$('labelPreview'),$('labelPhotoText'));
 async function imageData(file,max=1280,quality=.72){if(!file)return null;const bitmap=await createImageBitmap(file);let w=bitmap.width,h=bitmap.height;if(Math.max(w,h)>max){const k=max/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k)}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(bitmap,0,0,w,h);const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',quality));return await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(blob)})}
