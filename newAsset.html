@@ -172,7 +172,8 @@
             font-size: 15px
         }
 
-        .primary {
+        .btn:disabled { opacity:.5; cursor:not-allowed }
+          .primary {
             background: var(--b);
             color: #fff
         }
@@ -242,7 +243,7 @@
             <div class="hint">QR ตัวอย่าง 45002010000198020005 ระบบจะแปลงเป็น 201000019802</div><button type="button"
                 id="checkBtn" class="btn secondary">ตรวจสอบ Asset No.</button>
         </section>
-        <form id="form" class="disabled">
+        <form id="form">
             <section class="box">
                 <div class="section">2. ข้อมูล Asset</div>
                 <div class="grid">
@@ -275,7 +276,7 @@
                 </div>
                 <div class="hint">แนะนำถ่ายให้ชัดและครอบเฉพาะส่วนสำคัญ ระบบจะย่อรูปก่อนส่งเพื่อลดเวลา Upload</div>
             </section>
-            <section class="box"><button id="saveBtn" class="btn primary" type="submit">บันทึก Asset ของฉัน</button>
+            <section class="box"><button id="saveBtn" class="btn primary" type="submit" disabled>บันทึก Asset ของฉัน</button>
             </section>
         </form>
     </div>
@@ -311,7 +312,7 @@
         async function init() {try {await liff.init({liffId: LIFF_ID}); if (!liff.isLoggedIn()) {liff.login({redirectUri: location.href}); return } profile = await liff.getProfile(); $('who').textContent = profile.displayName || 'LINE connected'} catch (e) {message('เชื่อมต่อ LINE ไม่สำเร็จ: ' + (e.message || e))} }
         $('scanBtn').onclick = async () => {clearMsg(); try {if (liff.scanCodeV2) {const r = await liff.scanCodeV2(); if (r && r.value) {$('assetNo').value = parseAssetNo(r.value); await checkAsset()} } else message('LIFF นี้ยังไม่เปิดสิทธิ์ Scan QR กรุณากรอก Asset No. ก่อน')} catch (e) {if (!String(e.message || e).toLowerCase().includes('cancel')) message('Scan ไม่สำเร็จ: ' + (e.message || e))} };
         $('checkBtn').onclick = checkAsset;
-        async function checkAsset() {if (isCheckingAsset) return; isCheckingAsset = true; clearMsg(); const assetNo = parseAssetNo($('assetNo').value); $('assetNo').value = assetNo; if (!assetNo) {isCheckingAsset = false; return message('กรุณากรอกหรือ Scan Asset No.')} $('checkBtn').textContent = 'กำลังตรวจสอบ...'; $('checkBtn').disabled = true; try {const r = await fetch(CHECK_FLOW_URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({mode: 'asset', assetNo})}); if (!r.ok) throw Error('HTTP ' + r.status); const d = await r.json(); if (d.exists || ((d.items || []).length)) {return message('Asset No. นี้มีอยู่ในระบบแล้ว กรุณาเปิด Asset เดิมแทน')} checkedAssetNo = assetNo; $('form').classList.remove('disabled'); message('Asset No. ใช้งานได้ กรอกข้อมูลต่อได้เลย', 'ok')} catch (e) {message('ตรวจสอบ Asset ไม่สำเร็จ: ' + (e.message || e))} finally {isCheckingAsset = false; $('checkBtn').textContent = 'ตรวจสอบ Asset No.'; $('checkBtn').disabled = false} }
+        async function checkAsset() {if (isCheckingAsset) return; isCheckingAsset = true; clearMsg(); const assetNo = parseAssetNo($('assetNo').value); $('assetNo').value = assetNo; if (!assetNo) {isCheckingAsset = false; return message('กรุณากรอกหรือ Scan Asset No.')} $('checkBtn').textContent = 'กำลังตรวจสอบ...'; $('checkBtn').disabled = true; try {const r = await fetch(CHECK_FLOW_URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({mode: 'asset', assetNo})}); if (!r.ok) throw Error('HTTP ' + r.status); const d = await r.json(); if (d.exists || ((d.items || []).length)) {return message('Asset No. นี้มีอยู่ในระบบแล้ว กรุณาเปิด Asset เดิมแทน')} checkedAssetNo = assetNo; $('saveBtn').disabled = false; message('Asset No. ใช้งานได้ กรอกข้อมูลต่อได้เลย', 'ok')} catch (e) {message('ตรวจสอบ Asset ไม่สำเร็จ: ' + (e.message || e))} finally {isCheckingAsset = false; $('checkBtn').textContent = 'ตรวจสอบ Asset No.'; $('checkBtn').disabled = false} }
         function preview(input, img, text) {input.onchange = () => {const f = input.files[0]; if (!f) return; img.src = URL.createObjectURL(f); img.hidden = false; text.hidden = true}}
         preview($('assetPhoto'), $('assetPreview'), $('assetPhotoText')); preview($('labelPhoto'), $('labelPreview'), $('labelPhotoText'));
         async function imageData(file, max = 1280, quality = .72) {if (!file) return null; const bitmap = await createImageBitmap(file); let w = bitmap.width, h = bitmap.height; if (Math.max(w, h) > max) {const k = max / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k)} const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(bitmap, 0, 0, w, h); const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', quality)); return await new Promise((res, rej) => {const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob)})}
