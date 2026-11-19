@@ -36,7 +36,26 @@ let profile=null, checkedAssetNo='', employeeData=null;
 const $=id=>document.getElementById(id);
 function message(t,type='err'){const m=$('msg');m.textContent=t;m.className='msg '+type;m.style.display='block';scrollTo({top:0,behavior:'smooth'})}function clearMsg(){$('msg').style.display='none'}
 // Current rule based on supplied real example. Add more QR samples before treating this as universal.
-function parseAssetNo(raw){let v=String(raw||'').trim().replace(/\s/g,'');if(/^\d{20}$/.test(v)){v=v.slice(2,-4).replace(/^0+/,'')}return v}
+function parseAssetNo(raw) {
+    const value = String(raw || '')
+        .trim()
+        .replace(/\s/g, '');
+
+    // กรณีเป็น Asset No. โดยตรง 12 หลัก
+    if (/^\d{12}$/.test(value)) {
+        return value;
+    }
+
+    // ค้นหา Asset No. ที่ขึ้นต้นด้วย 201 และมีทั้งหมด 12 หลัก
+    const match = value.match(/201\d{9}/);
+
+    if (match) {
+        return match[0];
+    }
+
+    // ไม่พบรูปแบบที่รองรับ
+    return value;
+}
 async function init(){try{await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}profile=await liff.getProfile();$('who').textContent=profile.displayName||'LINE connected'}catch(e){message('เชื่อมต่อ LINE ไม่สำเร็จ: '+(e.message||e))}}
 $('scanBtn').onclick=async()=>{clearMsg();try{if(liff.scanCodeV2){const r=await liff.scanCodeV2();if(r&&r.value){$('assetNo').value=parseAssetNo(r.value);await checkAsset()}}else message('LIFF นี้ยังไม่เปิดสิทธิ์ Scan QR กรุณากรอก Asset No. ก่อน')}catch(e){if(!String(e.message||e).toLowerCase().includes('cancel'))message('Scan ไม่สำเร็จ: '+(e.message||e))}};
 $('checkBtn').onclick=checkAsset;
