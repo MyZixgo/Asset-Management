@@ -246,18 +246,7 @@
             <section class="box">
                 <div class="section">2. ข้อมูล Asset</div>
                 <div class="grid">
-                    <div>
-                        <div class="label">ประเภท <span class="req">*</span></div><input id="assetType" required
-                            placeholder="Notebook / Monitor">
-                    </div>
-                    <div>
-                        <div class="label">ผู้ผลิต</div><input id="manufacturer" placeholder="Dell">
-                    </div>
-                    <div>
-                        <div class="label">Model</div><input id="model">
-                    </div>
-                    <div>
-                        <div class="label">Serial No.</div><input id="serialNo">
+                    <div><div class="label">ประเภท <span class="req">*</span></div><select id="assetTypeSelect" required></select><input id="assetTypeOther" placeholder="ระบุประเภทอื่น" style="display:none;margin-top:7px"></div><div><div class="label">ผู้ผลิต</div><select id="manufacturerSelect"></select><input id="manufacturerOther" placeholder="ระบุผู้ผลิตอื่น" style="display:none;margin-top:7px"></div><div><div class="label">Model</div><select id="modelSelect"></select><input id="modelOther" placeholder="ระบุ Model อื่น" style="display:none;margin-top:7px"></div><div><div class="label">Serial No.</div><input id="serialNo">
                     </div>
                     <div class="full">
                         <div class="label">EmpCode <span class="req">*</span></div>
@@ -328,7 +317,35 @@
         async function imageData(file, max = 1280, quality = .72) {if (!file) return null; const bitmap = await createImageBitmap(file); let w = bitmap.width, h = bitmap.height; if (Math.max(w, h) > max) {const k = max / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k)} const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(bitmap, 0, 0, w, h); const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', quality)); return await new Promise((res, rej) => {const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob)})}
 
         $('empSearchBtn').onclick = searchEmployee;
-        async function searchEmployee() {
+        
+function uniqueSorted(values){return [...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'en',{sensitivity:'base'}))}
+function fillSelect(select,values,label){select.innerHTML=`<option value="">เลือก${label}</option>`+values.map(v=>`<option value="${escHtml(v)}">${escHtml(v)}</option>`).join('')+'<option value="Other">Other / ระบุเอง</option>'}
+function toggleOther(select,input){input.style.display=select.value==='Other'?'block':'none';if(select.value!=='Other')input.value=''}
+function initAssetDropdowns(){
+ const types=uniqueSorted(ASSET_REFERENCE.map(x=>x.type).filter(x=>x!=='Other'));
+ fillSelect($('assetTypeSelect'),types,'ประเภท');
+ fillSelect($('manufacturerSelect'),[], 'ผู้ผลิต');
+ fillSelect($('modelSelect'),[], 'Model');
+}
+function updateManufacturers(){
+ toggleOther($('assetTypeSelect'),$('assetTypeOther'));
+ const type=$('assetTypeSelect').value;
+ const list=uniqueSorted(ASSET_REFERENCE.filter(x=>!type||type==='Other'||x.type===type).map(x=>x.manufacturer).filter(x=>x!=='Other'));
+ fillSelect($('manufacturerSelect'),list,'ผู้ผลิต'); $('manufacturerOther').style.display='none'; updateModels();
+}
+function updateModels(){
+ toggleOther($('manufacturerSelect'),$('manufacturerOther'));
+ const type=$('assetTypeSelect').value, maker=$('manufacturerSelect').value;
+ const list=uniqueSorted(ASSET_REFERENCE.filter(x=>(!type||type==='Other'||x.type===type)&&(!maker||maker==='Other'||x.manufacturer===maker)).map(x=>x.model));
+ fillSelect($('modelSelect'),list,'Model'); $('modelOther').style.display='none';
+}
+$('assetTypeSelect').addEventListener('change',updateManufacturers);
+$('manufacturerSelect').addEventListener('change',updateModels);
+$('modelSelect').addEventListener('change',()=>toggleOther($('modelSelect'),$('modelOther')));
+function selectedOrOther(selectId,otherId){const v=$(selectId).value;return v==='Other'?$(otherId).value.trim():v}
+initAssetDropdowns();
+
+async function searchEmployee() {
             clearMsg();
             const prCode = $('empCode').value.trim();
             if (!prCode) return message('กรุณากรอก EmpCode');
@@ -349,7 +366,7 @@
         function escHtml(v) {return String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[c]))}
         $('empCode').addEventListener('input', () => {employeeData = null; $('employeeResult').style.display = 'none'});
 
-        $('form').onsubmit = async e => {e.preventDefault(); clearMsg(); const assetNo = parseAssetNo($('assetNo').value); if (assetNo !== checkedAssetNo) return message('Asset No. มีการเปลี่ยน กรุณากดตรวจสอบอีกครั้ง'); if (!profile) return message('ยังไม่ได้ข้อมูล LINE User'); const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'กำลังบันทึก...'; try {const [assetPhotoBase64, assetNoPhotoBase64] = await Promise.all([imageData($('assetPhoto').files[0]), imageData($('labelPhoto').files[0])]); if (!employeeData || employeeData.pr_code !== $('empCode').value.trim()) throw Error('กรุณาค้นหาและยืนยัน EmpCode ก่อนบันทึก'); const payload = {assetNo, assetType: $('assetType').value.trim(), manufacturer: $('manufacturer').value.trim(), model: $('model').value.trim(), serialNo: $('serialNo').value.trim(), empCode: employeeData.pr_code, empName: employeeData.pr_name, plant: employeeData.plant, department: employeeData.department, costCenter: employeeData.cost_center, area: $('area').value.trim(), lineUserId: profile.userId, lineDisplayName: profile.displayName || '', assetPhotoBase64, assetNoPhotoBase64, source: 'LINE'}; const r = await fetch(SAVE_FLOW_URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}); if (!r.ok) throw Error('HTTP ' + r.status); const d = await r.json(); if (d.ok === false) throw Error(d.message || 'Save failed'); message('บันทึก Asset เรียบร้อย', 'ok'); setTimeout(() => window.location.replace('./viewAsset.html?v=4'), 700)} catch (e) {message('บันทึกไม่สำเร็จ: ' + (e.message || e))} finally {btn.disabled = false; btn.textContent = 'บันทึก Asset ของฉัน'} };
+        $('form').onsubmit = async e => {e.preventDefault(); clearMsg(); const assetNo = parseAssetNo($('assetNo').value); if (assetNo !== checkedAssetNo) return message('Asset No. มีการเปลี่ยน กรุณากดตรวจสอบอีกครั้ง'); if (!profile) return message('ยังไม่ได้ข้อมูล LINE User'); const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'กำลังบันทึก...'; try {const [assetPhotoBase64, assetNoPhotoBase64] = await Promise.all([imageData($('assetPhoto').files[0]), imageData($('labelPhoto').files[0])]); if (!employeeData || employeeData.pr_code !== $('empCode').value.trim()) throw Error('กรุณาค้นหาและยืนยัน EmpCode ก่อนบันทึก'); const payload = {assetNo, assetType: selectedOrOther('assetTypeSelect','assetTypeOther'), manufacturer: selectedOrOther('manufacturerSelect','manufacturerOther'), model: selectedOrOther('modelSelect','modelOther'), serialNo: $('serialNo').value.trim(), empCode: employeeData.pr_code, empName: employeeData.pr_name, plant: employeeData.plant, department: employeeData.department, costCenter: employeeData.cost_center, area: $('area').value.trim(), lineUserId: profile.userId, lineDisplayName: profile.displayName || '', assetPhotoBase64, assetNoPhotoBase64, source: 'LINE'}; const r = await fetch(SAVE_FLOW_URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}); if (!r.ok) throw Error('HTTP ' + r.status); const d = await r.json(); if (d.ok === false) throw Error(d.message || 'Save failed'); message('บันทึก Asset เรียบร้อย', 'ok'); setTimeout(() => window.location.replace('./viewAsset.html?v=4'), 700)} catch (e) {message('บันทึกไม่สำเร็จ: ' + (e.message || e))} finally {btn.disabled = false; btn.textContent = 'บันทึก Asset ของฉัน'} };
         init();
     </script>
 </body>
