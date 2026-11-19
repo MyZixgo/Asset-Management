@@ -1,89 +1,357 @@
 <!doctype html>
 <html lang="th">
+
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f766e"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
-<title>Add Asset</title>
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<style>
-:root{--b:#0f766e;--bg:#f4f7f8;--tx:#172126;--mu:#66757d;--ln:#e4eaed;--red:#b91c1c}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Thai",sans-serif;color:var(--tx)}.app{max-width:640px;margin:auto;padding-bottom:32px}.head{background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;padding:calc(16px + env(safe-area-inset-top)) 18px 24px;border-radius:0 0 24px 24px}.top{display:flex;align-items:center;gap:12px}.back{border:0;background:#ffffff20;color:#fff;width:40px;height:40px;border-radius:12px;font-size:23px}.title{font-size:22px;font-weight:800}.sub{font-size:12px;opacity:.85}.box{background:#fff;margin:14px 14px 0;padding:16px;border:1px solid var(--ln);border-radius:18px}.label{font-size:13px;font-weight:750;margin:12px 0 6px}.label:first-child{margin-top:0}input,select,textarea{width:100%;border:1px solid #d4dde1;background:#fff;border-radius:12px;padding:13px;font-size:15px;outline:none}input:focus,select:focus,textarea:focus{border-color:#14b8a6}.assetrow{display:grid;grid-template-columns:1fr 52px;gap:8px}.scan{border:0;border-radius:12px;background:#e6fffb;color:#0f766e;font-size:21px}.hint{font-size:11px;color:var(--mu);margin-top:5px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.photo{border:1.5px dashed #aebdc3;border-radius:15px;min-height:145px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;position:relative;background:#fafcfc}.photo img{width:100%;height:170px;object-fit:cover}.photo input{position:absolute;inset:0;opacity:0}.photo span{padding:12px;color:var(--mu);font-size:13px}.btn{width:100%;border:0;border-radius:14px;padding:15px;font-weight:800;font-size:15px}.primary{background:var(--b);color:#fff}.secondary{background:#e6fffb;color:#0f766e;margin-top:8px}.msg{display:none;margin:14px;border-radius:13px;padding:12px;font-size:13px}.err{background:#fef2f2;color:var(--red);border:1px solid #fecaca}.ok{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}.disabled{opacity:.55;pointer-events:none}.section{font-weight:800;margin-bottom:4px}.req{color:#dc2626}.full{grid-column:1/-1}
-</style>
-</head><body><div class="app">
-<header class="head"><div class="top"><button class="back" onclick="history.back()">‹</button><div><div class="title">เพิ่ม Asset</div><div class="sub" id="who">กำลังเชื่อมต่อ LINE...</div></div></div></header>
-<div id="msg" class="msg"></div>
-<section class="box"><div class="section">1. Asset No.</div><div class="label">Asset No. <span class="req">*</span></div><div class="assetrow"><input id="assetNo" inputmode="numeric" placeholder="กรอกหรือ Scan QR"><button type="button" id="scanBtn" class="scan" title="Scan">▣</button></div><div class="hint">QR ตัวอย่าง 45002010000198020005 ระบบจะแปลงเป็น 201000019802</div><button type="button" id="checkBtn" class="btn secondary">ตรวจสอบ Asset No.</button></section>
-<form id="form" class="disabled">
-<section class="box"><div class="section">2. ข้อมูล Asset</div><div class="grid">
-<div><div class="label">ประเภท <span class="req">*</span></div><input id="assetType" required placeholder="Notebook / Monitor"></div><div><div class="label">ผู้ผลิต</div><input id="manufacturer" placeholder="Dell"></div>
-<div><div class="label">Model</div><input id="model"></div><div><div class="label">Serial No.</div><input id="serialNo"></div>
-<div class="full"><div class="label">EmpCode <span class="req">*</span></div><div class="assetrow"><input id="empCode" inputmode="numeric" required placeholder="กรอกรหัสพนักงาน เช่น 104657"><button type="button" id="empSearchBtn" class="scan" title="ค้นหาพนักงาน">⌕</button></div><div class="hint">ระบบจะค้นหาจาก PersonalRecord ด้วย pr_code</div></div>
-<div class="full" id="employeeResult" style="display:none;background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:12px;margin-top:2px"></div>
-<div><div class="label">Area</div><input id="area"></div>
-</div></section>
-<section class="box"><div class="section">3. รูปยืนยัน</div><div class="grid">
-<label class="photo"><span id="assetPhotoText">📷<br>รูปภาพ Asset<br><small>แตะเพื่อถ่าย/เลือกรูป</small></span><img id="assetPreview" hidden><input id="assetPhoto" type="file" accept="image/*" capture="environment"></label>
-<label class="photo"><span id="labelPhotoText">🏷️<br>รูปหมายเลข Asset No.<br><small>ถ่ายให้เห็นเลขชัดเจน</small></span><img id="labelPreview" hidden><input id="labelPhoto" type="file" accept="image/*" capture="environment"></label>
-</div><div class="hint">แนะนำถ่ายให้ชัดและครอบเฉพาะส่วนสำคัญ ระบบจะย่อรูปก่อนส่งเพื่อลดเวลา Upload</div></section>
-<section class="box"><button id="saveBtn" class="btn primary" type="submit">บันทึก Asset ของฉัน</button></section>
-</form></div>
-<script>
-// CONFIG
-const LIFF_ID='2010143473-Vaj7uW7d';
-const CHECK_FLOW_URL='https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/06/workflows/25817dc28862410b92149ab4633a4401/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sYSstQibB3PM-TBOtOK7dChdtEbaRdKh3DgXTRYlt6I';
-const SAVE_FLOW_URL='https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/02/workflows/7a108125c83c499ba1c8cf2dd84bcac1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=nqx3n6-GjKlgPAw_r_-Q_g7razTwyjGu9FMKo-s3Nks';
-const EMPLOYEE_FLOW_URL='https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/25/workflows/0676c947f5b34ab8b1be1ca453594242/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qBEviZgPIhgxMS7qpyMgplFcf7VM735vLWjyc_I8Jvs';
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#0f766e">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Add Asset</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        :root {
+            --b: #0f766e;
+            --bg: #f4f7f8;
+            --tx: #172126;
+            --mu: #66757d;
+            --ln: #e4eaed;
+            --red: #b91c1c
+        }
 
-let profile=null, checkedAssetNo='', employeeData=null;
-const $=id=>document.getElementById(id);
-function message(t,type='err'){const m=$('msg');m.textContent=t;m.className='msg '+type;m.style.display='block';scrollTo({top:0,behavior:'smooth'})}function clearMsg(){$('msg').style.display='none'}
-// Current rule based on supplied real example. Add more QR samples before treating this as universal.
-function parseAssetNo(raw) {
-    const value = String(raw || '').replace(/\D/g, '');
+        * {
+            box-sizing: border-box
+        }
 
-    // QR หน้างาน: 4500 + Asset No. 12 หลัก + Running/Check 5 หลัก
-    if (/^4500\d{17}$/.test(value)) {
-        return value.slice(4, -5);
-    }
+        body {
+            margin: 0;
+            background: var(--bg);
+            font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif;
+            color: var(--tx)
+        }
 
-    // กรอก Asset No. ตรง ๆ
-    if (/^\d{12}$/.test(value)) {
-        return value;
-    }
+        .app {
+            max-width: 640px;
+            margin: auto;
+            padding-bottom: 32px
+        }
 
-    // สำรอง: หาเลข 12 หลักที่ขึ้นต้นด้วย 201
-    const match = value.match(/201\d{9}/);
-    return match ? match[0] : value;
-}
-let isCheckingAsset = false;
-async function init(){try{await liff.init({liffId:LIFF_ID});if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}profile=await liff.getProfile();$('who').textContent=profile.displayName||'LINE connected'}catch(e){message('เชื่อมต่อ LINE ไม่สำเร็จ: '+(e.message||e))}}
-$('scanBtn').onclick=async()=>{clearMsg();try{if(liff.scanCodeV2){const r=await liff.scanCodeV2();if(r&&r.value){$('assetNo').value=parseAssetNo(r.value);await checkAsset()}}else message('LIFF นี้ยังไม่เปิดสิทธิ์ Scan QR กรุณากรอก Asset No. ก่อน')}catch(e){if(!String(e.message||e).toLowerCase().includes('cancel'))message('Scan ไม่สำเร็จ: '+(e.message||e))}};
-$('checkBtn').onclick=checkAsset;
-async function checkAsset(){if(isCheckingAsset)return;isCheckingAsset=true;clearMsg();const assetNo=parseAssetNo($('assetNo').value);$('assetNo').value=assetNo;if(!assetNo){isCheckingAsset=false;return message('กรุณากรอกหรือ Scan Asset No.')}$('checkBtn').textContent='กำลังตรวจสอบ...';$('checkBtn').disabled=true;try{const r=await fetch(CHECK_FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'asset',assetNo})});if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();if(d.exists||((d.items||[]).length)){return message('Asset No. นี้มีอยู่ในระบบแล้ว กรุณาเปิด Asset เดิมแทน') }checkedAssetNo=assetNo;$('form').classList.remove('disabled');message('Asset No. ใช้งานได้ กรอกข้อมูลต่อได้เลย','ok')}catch(e){message('ตรวจสอบ Asset ไม่สำเร็จ: '+(e.message||e))}finally{isCheckingAsset=false;$('checkBtn').textContent='ตรวจสอบ Asset No.';$('checkBtn').disabled=false}}
-function preview(input,img,text){input.onchange=()=>{const f=input.files[0];if(!f)return;img.src=URL.createObjectURL(f);img.hidden=false;text.hidden=true}}
-preview($('assetPhoto'),$('assetPreview'),$('assetPhotoText'));preview($('labelPhoto'),$('labelPreview'),$('labelPhotoText'));
-async function imageData(file,max=1280,quality=.72){if(!file)return null;const bitmap=await createImageBitmap(file);let w=bitmap.width,h=bitmap.height;if(Math.max(w,h)>max){const k=max/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k)}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(bitmap,0,0,w,h);const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',quality));return await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(blob)})}
+        .head {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: #fff;
+            padding: calc(16px + env(safe-area-inset-top)) 18px 24px;
+            border-radius: 0 0 24px 24px
+        }
 
-$('empSearchBtn').onclick=searchEmployee;
-async function searchEmployee(){
-  clearMsg();
-  const prCode=$('empCode').value.trim();
-  if(!prCode)return message('กรุณากรอก EmpCode');
-  const btn=$('empSearchBtn');btn.disabled=true;btn.textContent='…';
-  try{
-    const r=await fetch(EMPLOYEE_FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pr_code:prCode})});
-    if(!r.ok)throw Error('HTTP '+r.status);
-    const d=await r.json();
-    const emp=d.employee || (Array.isArray(d.items)&&d.items[0]);
-    if(!emp)throw Error('ไม่พบ EmpCode ใน PersonalRecord');
-    employeeData={pr_code:String(emp.pr_code||prCode),pr_name:emp.pr_name||'',plant:emp.plant||'',department:emp.department||'',cost_center:emp.cost_center||''};
-    $('employeeResult').style.display='block';
-    $('employeeResult').innerHTML=`<b>${escHtml(employeeData.pr_name||'-')}</b><br><span style="font-size:12px;color:#66757d">EmpCode: ${escHtml(employeeData.pr_code)}<br>${escHtml(employeeData.plant)} / ${escHtml(employeeData.department)}<br>Cost Center: ${escHtml(employeeData.cost_center||'-')}</span>`;
-    message('พบข้อมูลพนักงานแล้ว','ok');
-  }catch(e){employeeData=null;$('employeeResult').style.display='none';message('ค้นหาพนักงานไม่สำเร็จ: '+(e.message||e));}
-  finally{btn.disabled=false;btn.textContent='⌕';}
-}
-function escHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-$('empCode').addEventListener('input',()=>{employeeData=null;$('employeeResult').style.display='none'});
+        .top {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
 
-$('form').onsubmit=async e=>{e.preventDefault();clearMsg();const assetNo=parseAssetNo($('assetNo').value);if(assetNo!==checkedAssetNo)return message('Asset No. มีการเปลี่ยน กรุณากดตรวจสอบอีกครั้ง');if(!profile)return message('ยังไม่ได้ข้อมูล LINE User');const btn=$('saveBtn');btn.disabled=true;btn.textContent='กำลังบันทึก...';try{const [assetPhotoBase64,assetNoPhotoBase64]=await Promise.all([imageData($('assetPhoto').files[0]),imageData($('labelPhoto').files[0])]);if(!employeeData || employeeData.pr_code!==$('empCode').value.trim())throw Error('กรุณาค้นหาและยืนยัน EmpCode ก่อนบันทึก');const payload={assetNo,assetType:$('assetType').value.trim(),manufacturer:$('manufacturer').value.trim(),model:$('model').value.trim(),serialNo:$('serialNo').value.trim(),empCode:employeeData.pr_code,empName:employeeData.pr_name,plant:employeeData.plant,department:employeeData.department,costCenter:employeeData.cost_center,area:$('area').value.trim(),lineUserId:profile.userId,lineDisplayName:profile.displayName||'',assetPhotoBase64,assetNoPhotoBase64,source:'LINE'};const r=await fetch(SAVE_FLOW_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();if(d.ok===false)throw Error(d.message||'Save failed');message('บันทึก Asset เรียบร้อย','ok');setTimeout(()=>location.href='myAsset.html',700)}catch(e){message('บันทึกไม่สำเร็จ: '+(e.message||e))}finally{btn.disabled=false;btn.textContent='บันทึก Asset ของฉัน'}};
-init();
-</script></body></html>
+        .back {
+            border: 0;
+            background: #ffffff20;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            font-size: 23px
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: 800
+        }
+
+        .sub {
+            font-size: 12px;
+            opacity: .85
+        }
+
+        .box {
+            background: #fff;
+            margin: 14px 14px 0;
+            padding: 16px;
+            border: 1px solid var(--ln);
+            border-radius: 18px
+        }
+
+        .label {
+            font-size: 13px;
+            font-weight: 750;
+            margin: 12px 0 6px
+        }
+
+        .label:first-child {
+            margin-top: 0
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid #d4dde1;
+            background: #fff;
+            border-radius: 12px;
+            padding: 13px;
+            font-size: 15px;
+            outline: none
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #14b8a6
+        }
+
+        .assetrow {
+            display: grid;
+            grid-template-columns: 1fr 52px;
+            gap: 8px
+        }
+
+        .scan {
+            border: 0;
+            border-radius: 12px;
+            background: #e6fffb;
+            color: #0f766e;
+            font-size: 21px
+        }
+
+        .hint {
+            font-size: 11px;
+            color: var(--mu);
+            margin-top: 5px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .photo {
+            border: 1.5px dashed #aebdc3;
+            border-radius: 15px;
+            min-height: 145px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            background: #fafcfc
+        }
+
+        .photo img {
+            width: 100%;
+            height: 170px;
+            object-fit: cover
+        }
+
+        .photo input {
+            position: absolute;
+            inset: 0;
+            opacity: 0
+        }
+
+        .photo span {
+            padding: 12px;
+            color: var(--mu);
+            font-size: 13px
+        }
+
+        .btn {
+            width: 100%;
+            border: 0;
+            border-radius: 14px;
+            padding: 15px;
+            font-weight: 800;
+            font-size: 15px
+        }
+
+        .primary {
+            background: var(--b);
+            color: #fff
+        }
+
+        .secondary {
+            background: #e6fffb;
+            color: #0f766e;
+            margin-top: 8px
+        }
+
+        .msg {
+            display: none;
+            margin: 14px;
+            border-radius: 13px;
+            padding: 12px;
+            font-size: 13px
+        }
+
+        .err {
+            background: #fef2f2;
+            color: var(--red);
+            border: 1px solid #fecaca
+        }
+
+        .ok {
+            background: #ecfdf5;
+            color: #166534;
+            border: 1px solid #bbf7d0
+        }
+
+        .disabled {
+            opacity: .55;
+            pointer-events: none
+        }
+
+        .section {
+            font-weight: 800;
+            margin-bottom: 4px
+        }
+
+        .req {
+            color: #dc2626
+        }
+
+        .full {
+            grid-column: 1/-1
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header class="head">
+            <div class="top"><button class="back" onclick="history.back()">‹</button>
+                <div>
+                    <div class="title">เพิ่ม Asset</div>
+                    <div class="sub" id="who">กำลังเชื่อมต่อ LINE...</div>
+                </div>
+            </div>
+        </header>
+        <div id="msg" class="msg"></div>
+        <section class="box">
+            <div class="section">1. Asset No.</div>
+            <div class="label">Asset No. <span class="req">*</span></div>
+            <div class="assetrow"><input id="assetNo" inputmode="numeric" placeholder="กรอกหรือ Scan QR"><button
+                    type="button" id="scanBtn" class="scan" title="Scan">▣</button></div>
+            <div class="hint">QR ตัวอย่าง 45002010000198020005 ระบบจะแปลงเป็น 201000019802</div><button type="button"
+                id="checkBtn" class="btn secondary">ตรวจสอบ Asset No.</button>
+        </section>
+        <form id="form" class="disabled">
+            <section class="box">
+                <div class="section">2. ข้อมูล Asset</div>
+                <div class="grid">
+                    <div>
+                        <div class="label">ประเภท <span class="req">*</span></div><input id="assetType" required
+                            placeholder="Notebook / Monitor">
+                    </div>
+                    <div>
+                        <div class="label">ผู้ผลิต</div><input id="manufacturer" placeholder="Dell">
+                    </div>
+                    <div>
+                        <div class="label">Model</div><input id="model">
+                    </div>
+                    <div>
+                        <div class="label">Serial No.</div><input id="serialNo">
+                    </div>
+                    <div class="full">
+                        <div class="label">EmpCode <span class="req">*</span></div>
+                        <div class="assetrow"><input id="empCode" inputmode="numeric" required
+                                placeholder="กรอกรหัสพนักงาน เช่น 104657"><button type="button" id="empSearchBtn"
+                                class="scan" title="ค้นหาพนักงาน">⌕</button></div>
+                        <div class="hint">ระบบจะค้นหาจาก PersonalRecord ด้วย pr_code</div>
+                    </div>
+                    <div class="full" id="employeeResult"
+                        style="display:none;background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:12px;margin-top:2px">
+                    </div>
+                    <div>
+                        <div class="label">Area</div><input id="area">
+                    </div>
+                </div>
+            </section>
+            <section class="box">
+                <div class="section">3. รูปยืนยัน</div>
+                <div class="grid">
+                    <label class="photo"><span id="assetPhotoText">📷<br>รูปภาพ
+                            Asset<br><small>แตะเพื่อถ่าย/เลือกรูป</small></span><img id="assetPreview" hidden><input
+                            id="assetPhoto" type="file" accept="image/*" capture="environment"></label>
+                    <label class="photo"><span id="labelPhotoText">🏷️<br>รูปหมายเลข Asset
+                            No.<br><small>ถ่ายให้เห็นเลขชัดเจน</small></span><img id="labelPreview" hidden><input
+                            id="labelPhoto" type="file" accept="image/*" capture="environment"></label>
+                </div>
+                <div class="hint">แนะนำถ่ายให้ชัดและครอบเฉพาะส่วนสำคัญ ระบบจะย่อรูปก่อนส่งเพื่อลดเวลา Upload</div>
+            </section>
+            <section class="box"><button id="saveBtn" class="btn primary" type="submit">บันทึก Asset ของฉัน</button>
+            </section>
+        </form>
+    </div>
+    <script>
+        // CONFIG
+        const LIFF_ID = '2010143473-Vaj7uW7d';
+        const CHECK_FLOW_URL = 'https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/06/workflows/25817dc28862410b92149ab4633a4401/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sYSstQibB3PM-TBOtOK7dChdtEbaRdKh3DgXTRYlt6I';
+        const SAVE_FLOW_URL = 'https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/02/workflows/7a108125c83c499ba1c8cf2dd84bcac1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=nqx3n6-GjKlgPAw_r_-Q_g7razTwyjGu9FMKo-s3Nks';
+        const EMPLOYEE_FLOW_URL = 'https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/25/workflows/0676c947f5b34ab8b1be1ca453594242/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qBEviZgPIhgxMS7qpyMgplFcf7VM735vLWjyc_I8Jvs';
+
+        let profile = null, checkedAssetNo = '', employeeData = null;
+        const $ = id => document.getElementById(id);
+        function message(t, type = 'err') {const m = $('msg'); m.textContent = t; m.className = 'msg ' + type; m.style.display = 'block'; scrollTo({top: 0, behavior: 'smooth'})} function clearMsg() {$('msg').style.display = 'none'}
+        // Current rule based on supplied real example. Add more QR samples before treating this as universal.
+        function parseAssetNo(raw) {
+            const value = String(raw || '').replace(/\D/g, '');
+
+            // QR หน้างาน: 4500 + Asset No. 12 หลัก + Running/Check 5 หลัก
+            if (/^4500\d{17}$/.test(value)) {
+                return value.slice(4, -5);
+            }
+
+            // กรอก Asset No. ตรง ๆ
+            if (/^\d{12}$/.test(value)) {
+                return value;
+            }
+
+            // สำรอง: หาเลข 12 หลักที่ขึ้นต้นด้วย 201
+            const match = value.match(/201\d{9}/);
+            return match ? match[0] : value;
+        }
+        let isCheckingAsset = false;
+        async function init() {try {await liff.init({liffId: LIFF_ID}); if (!liff.isLoggedIn()) {liff.login({redirectUri: location.href}); return } profile = await liff.getProfile(); $('who').textContent = profile.displayName || 'LINE connected'} catch (e) {message('เชื่อมต่อ LINE ไม่สำเร็จ: ' + (e.message || e))} }
+        $('scanBtn').onclick = async () => {clearMsg(); try {if (liff.scanCodeV2) {const r = await liff.scanCodeV2(); if (r && r.value) {$('assetNo').value = parseAssetNo(r.value); await checkAsset()} } else message('LIFF นี้ยังไม่เปิดสิทธิ์ Scan QR กรุณากรอก Asset No. ก่อน')} catch (e) {if (!String(e.message || e).toLowerCase().includes('cancel')) message('Scan ไม่สำเร็จ: ' + (e.message || e))} };
+        $('checkBtn').onclick = checkAsset;
+        async function checkAsset() {if (isCheckingAsset) return; isCheckingAsset = true; clearMsg(); const assetNo = parseAssetNo($('assetNo').value); $('assetNo').value = assetNo; if (!assetNo) {isCheckingAsset = false; return message('กรุณากรอกหรือ Scan Asset No.')} $('checkBtn').textContent = 'กำลังตรวจสอบ...'; $('checkBtn').disabled = true; try {const r = await fetch(CHECK_FLOW_URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({mode: 'asset', assetNo})}); if (!r.ok) throw Error('HTTP ' + r.status); const d = await r.json(); if (d.exists || ((d.items || []).length)) {return message('Asset No. นี้มีอยู่ในระบบแล้ว กรุณาเปิด Asset เดิมแทน')} checkedAssetNo = assetNo; $('form').classList.remove('disabled'); message('Asset No. ใช้งานได้ กรอกข้อมูลต่อได้เลย', 'ok')} catch (e) {message('ตรวจสอบ Asset ไม่สำเร็จ: ' + (e.message || e))} finally {isCheckingAsset = false; $('checkBtn').textContent = 'ตรวจสอบ Asset No.'; $('checkBtn').disabled = false} }
+        function preview(input, img, text) {input.onchange = () => {const f = input.files[0]; if (!f) return; img.src = URL.createObjectURL(f); img.hidden = false; text.hidden = true}}
+        preview($('assetPhoto'), $('assetPreview'), $('assetPhotoText')); preview($('labelPhoto'), $('labelPreview'), $('labelPhotoText'));
+        async function imageData(file, max = 1280, quality = .72) {if (!file) return null; const bitmap = await createImageBitmap(file); let w = bitmap.width, h = bitmap.height; if (Math.max(w, h) > max) {const k = max / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k)} const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(bitmap, 0, 0, w, h); const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', quality)); return await new Promise((res, rej) => {const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(blob)})}
+
+        $('empSearchBtn').onclick = searchEmployee;
+        async function searchEmployee() {
+            clearMsg();
+            const prCode = $('empCode').value.trim();
+            if (!prCode) return message('กรุณากรอก EmpCode');
+            const btn = $('empSearchBtn'); btn.disabled = true; btn.textContent = '…';
+            try {
+                const r = await fetch(EMPLOYEE_FLOW_URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({pr_code: prCode})});
+                if (!r.ok) throw Error('HTTP ' + r.status);
+                const d = await r.json();
+                const emp = d.employee || (Array.isArray(d.items) && d.items[0]);
+                if (!emp) throw Error('ไม่พบ EmpCode ใน PersonalRecord');
+                employeeData = {pr_code: String(emp.pr_code || prCode), pr_name: emp.pr_name || '', plant: emp.plant || '', department: emp.department || '', cost_center: emp.cost_center || ''};
+                $('employeeResult').style.display = 'block';
+                $('employeeResult').innerHTML = `<b>${escHtml(employeeData.pr_name || '-')}</b><br><span style="font-size:12px;color:#66757d">EmpCode: ${escHtml(employeeData.pr_code)}<br>${escHtml(employeeData.plant)} / ${escHtml(employeeData.department)}<br>Cost Center: ${escHtml(employeeData.cost_center || '-')}</span>`;
+                message('พบข้อมูลพนักงานแล้ว', 'ok');
+            } catch (e) {employeeData = null; $('employeeResult').style.display = 'none'; message('ค้นหาพนักงานไม่สำเร็จ: ' + (e.message || e));}
+            finally {btn.disabled = false; btn.textContent = '⌕';}
+        }
+        function escHtml(v) {return String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[c]))}
+        $('empCode').addEventListener('input', () => {employeeData = null; $('employeeResult').style.display = 'none'});
+
+        $('form').onsubmit = async e => {e.preventDefault(); clearMsg(); const assetNo = parseAssetNo($('assetNo').value); if (assetNo !== checkedAssetNo) return message('Asset No. มีการเปลี่ยน กรุณากดตรวจสอบอีกครั้ง'); if (!profile) return message('ยังไม่ได้ข้อมูล LINE User'); const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'กำลังบันทึก...'; try {const [assetPhotoBase64, assetNoPhotoBase64] = await Promise.all([imageData($('assetPhoto').files[0]), imageData($('labelPhoto').files[0])]); if (!employeeData || employeeData.pr_code !== $('empCode').value.trim()) throw Error('กรุณาค้นหาและยืนยัน EmpCode ก่อนบันทึก'); const payload = {assetNo, assetType: $('assetType').value.trim(), manufacturer: $('manufacturer').value.trim(), model: $('model').value.trim(), serialNo: $('serialNo').value.trim(), empCode: employeeData.pr_code, empName: employeeData.pr_name, plant: employeeData.plant, department: employeeData.department, costCenter: employeeData.cost_center, area: $('area').value.trim(), lineUserId: profile.userId, lineDisplayName: profile.displayName || '', assetPhotoBase64, assetNoPhotoBase64, source: 'LINE'}; const r = await fetch(SAVE_FLOW_URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}); if (!r.ok) throw Error('HTTP ' + r.status); const d = await r.json(); if (d.ok === false) throw Error(d.message || 'Save failed'); message('บันทึก Asset เรียบร้อย', 'ok'); setTimeout(() => window.location.replace('./viewAsset.html?v=4'), 700)} catch (e) {message('บันทึกไม่สำเร็จ: ' + (e.message || e))} finally {btn.disabled = false; btn.textContent = 'บันทึก Asset ของฉัน'} };
+        init();
+    </script>
+</body>
+
+</html>
