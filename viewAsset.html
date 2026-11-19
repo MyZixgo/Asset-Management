@@ -103,7 +103,7 @@
 
   el('search').addEventListener('input', filter);
   el('refresh').addEventListener('click', () => profile && loadAssets(profile.userId));
-  el('addBtn').addEventListener('click', () => location.href='addAsset.html');
+  el('addBtn').addEventListener('click', () => window.location.href='./newAsset.html?v=11');
   init();
 </script>
 </body>
