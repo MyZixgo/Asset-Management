@@ -327,7 +327,15 @@
               }catch(e){message('ตรวจสอบ Asset ไม่สำเร็จ: '+(e.message||e))}finally{isCheckingAsset=false;$('checkBtn').textContent='ตรวจสอบ Asset No.';$('checkBtn').disabled=false}
           }
           function setExistingSelect(selId,otherId,value,after){if(!value)return;const sel=$(selId);const ok=[...sel.options].some(o=>o.value===value);if(ok)sel.value=value;else{sel.value='Other';$(otherId).style.display='block';$(otherId).value=value}if(after)after()}
-          function fillExisting(a){setExistingSelect('assetTypeSelect','assetTypeOther',a.assetType,updateManufacturers);setExistingSelect('manufacturerSelect','manufacturerOther',a.manufacturer,updateModels);setExistingSelect('modelSelect','modelOther',a.model,null);$('serialNo').value=a.serialNo||'';$('area').value=a.area||'';}
+          function fillExisting(a){
+                setExistingSelect('assetTypeSelect','assetTypeOther',a.assetType,updateManufacturers);
+                setExistingSelect('manufacturerSelect','manufacturerOther',a.manufacturer,updateModels);
+                setExistingSelect('modelSelect','modelOther',a.model,null);
+                $('serialNo').value=a.serialNo||'';
+                $('area').value=a.area||'';
+                if(a.assetPhotoUrl){$('assetPreview').src=a.assetPhotoUrl;$('assetPreview').hidden=false;$('assetPhotoText').hidden=true}else{$('assetPreview').hidden=true;$('assetPhotoText').hidden=false}
+                if(a.assetNoPhotoUrl){$('labelPreview').src=a.assetNoPhotoUrl;$('labelPreview').hidden=false;$('labelPhotoText').hidden=true}else{$('labelPreview').hidden=true;$('labelPhotoText').hidden=false}
+            }
           function showExisting(a,occupied){const c=$('existingCard');c.style.display='block';c.style.background=occupied?'#fff7ed':'#f0fdfa';c.innerHTML=`<b>${occupied?'Asset มีผู้รับผิดชอบอยู่แล้ว':'พบ Asset เดิมในระบบ'}</b><br><span style="font-size:12px;color:#66757d">${escHtml(a.assetType||'-')} • ${escHtml(a.manufacturer||'-')} • ${escHtml(a.model||'-')}<br>Serial: ${escHtml(a.serialNo||'-')}<br>พื้นที่ล่าสุด: ${escHtml([a.plant,a.department,a.area].filter(Boolean).join(' / ')||'-')}<br>ผู้รับผิดชอบ: ${escHtml(a.empCode||'ไม่มีผู้รับผิดชอบ')}</span>`}
           function preview(input, img, text) {input.onchange = () => {const f = input.files[0]; if (!f) return; img.src = URL.createObjectURL(f); img.hidden = false; text.hidden = true}}
         preview($('assetPhoto'), $('assetPreview'), $('assetPhotoText')); preview($('labelPhoto'), $('labelPreview'), $('labelPhotoText'));
